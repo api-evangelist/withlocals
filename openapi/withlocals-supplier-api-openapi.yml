@@ -1,0 +1,118 @@
+openapi: 3.2.0
+info:
+  title: Withlocals Partner Supplier API
+  version: 1.0.0
+  description: 'A single contract for OTA partners and other commercial integrations.
+
+    Covers products, availability, and the create -> amend -> cancel booking
+
+    lifecycle.
+
+
+    `POST /bookings` creates a `CONFIRMED` booking.'
+  contact:
+    name: Withlocals Partner Integrations
+    email: partners@withlocals.com
+  x-logo:
+    url: ./assets/logo.svg
+    altText: Withlocals
+    href: https://www.withlocals.com
+    backgroundColor: '#ffffff'
+servers:
+- url: https://test-api.withlocals.com/v1/partner
+  description: Test / Sandbox
+security:
+- bearerAuth: []
+tags:
+- name: Supplier
+  description: Self-describing supplier metadata.
+paths:
+  /:
+    get:
+      tags:
+      - Supplier
+      operationId: getSupplier
+      summary: Get supplier details
+      description: 'Returns the supplier''s self-description.
+
+
+        v1 surfaces:
+
+        - `supplierName` — identifies the supplier.
+
+        - `supportsIdempotencyKey` — currently `false`'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  responses:
+    Unauthorized:
+      description: Missing or invalid Bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: UNAUTHORIZED
+            errorMessage: Missing or invalid API token
+            requestId: req_7c2b18d1
+  schemas:
+    Supplier:
+      type: object
+      description: "Self-describing supplier metadata. Returned from `GET /`. Partners SHOULD\nread this on first connect and cache it.\n\n- Prices are quoted in **EUR** only in v1 (see `Money`); there is no\n  per-request currency selection.\n- v1 has **no reserve step** — `POST /bookings` creates a `CONFIRMED`\n  booking directly.\n"
+      required:
+      - supplierName
+      properties:
+        supplierName:
+          type: string
+          example: Withlocals
+        supportsIdempotencyKey:
+          type: boolean
+          default: false
+          description: 'When `true`, repeated `POST /bookings` with the same `Idempotency-Key`
+
+            header return the original result. v1 ships with `false` (the header
+
+            is accepted but not enforced); flips to `true` in future versions.
+
+            '
+    Error:
+      type: object
+      description: 'Error envelope.
+
+        '
+      required:
+      - error
+      - errorMessage
+      properties:
+        error:
+          type: string
+          description: Stable error code. Partners are expected to switch on this value.
+          enum:
+          - BAD_REQUEST
+          - UNAUTHORIZED
+          - FORBIDDEN
+          - NOT_FOUND
+          - CONFLICT
+          - PRECONDITION_FAILED
+          - INTERNAL_ERROR
+        errorMessage:
+          type: string
+          description: Human-readable message. Not stable; do not parse.
+          example: Hold expired before confirmation.
+        requestId:
+          type: string
+          description: Trace id for support requests.
+          example: req_5f3a9b71
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: "Per-partner opaque API token issued by Withlocals. Send on every\nrequest as:\n\n    Authorization: Bearer <token>\n"

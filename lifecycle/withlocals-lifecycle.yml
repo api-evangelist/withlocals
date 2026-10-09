@@ -1,0 +1,8 @@
+generated: '2026-10-09'
+method: derived
+source: https://developers.withlocals.com/api-reference/openapi.yaml
+versioning: URI path major version (/v1/partner); contract info.version 1.0.0. The spec signals a planned behaviour change "in future versions" (Idempotency-Key enforcement flips from false to true, surfaced via GET / supportsIdempotencyKey).
+deprecation: No deprecation policy, Sunset/Deprecation headers or deprecated operations published (0 operations marked deprecated in the contract).
+deprecated_operations: []
+status_page: null
+sla: none published

@@ -1,0 +1,8 @@
+generated: '2026-10-09'
+method: generated
+source: openapi/withlocals-partner-api-openapi.yml
+note: No provider-published skills or AGENTS.md were found. These skills are generated from the OpenAPI.
+skills:
+- {name: withlocals-book-experience, path: skills/withlocals-book-experience.md}
+- {name: withlocals-manage-booking, path: skills/withlocals-manage-booking.md}
+- {name: withlocals-webhooks, path: skills/withlocals-webhooks.md}

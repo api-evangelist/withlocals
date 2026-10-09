@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/withlocals/main/json-schema/withlocals-booking-schema.json",
+  "title": "Booking",
+  "description": "A partner booking. Returned by create, amend, cancel, and read.\n\nWhen `status=CANCELLED`, `cancellationReason` is set and the record persists\nfor partner refund handling.\n",
+  "x-generated": "2026-10-09",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/withlocals-partner-api-openapi.yml#/components/schemas/Booking",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "productId",
+    "title",
+    "date",
+    "time",
+    "timeZone",
+    "createdAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Withlocals booking id."
+    },
+    "partnerReference": {
+      "type": "string",
+      "description": "Partner's own booking id (internally `external_id`)."
+    },
+    "productId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "title": {
+      "type": "string",
+      "description": "Denormalized product title at the time of booking."
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string",
+      "pattern": "^[0-2][0-9]:[0-5][0-9]$",
+      "description": "Local clock time at the experience location."
+    },
+    "timeZone": {
+      "type": "string",
+      "description": "IANA time zone for `date` / `time`."
+    },
+    "status": {
+      "$ref": "#/$defs/BookingStatus"
+    },
+    "cancellationReason": {
+      "type": "string",
+      "enum": [
+        "CANCELLEDBYGUEST",
+        "CANCELLEDBYHOST",
+        "CANCELLEDBYADMIN",
+        "HOSTNOSHOW"
+      ],
+      "description": "Present when `status=CANCELLED`. Partner-initiated cancellations\n(`DELETE /bookings/{bookingId}`) always set `CANCELLEDBYGUEST`; the\nother values appear on bookings cancelled internally by the host,\nadmin, or marked as a no-show.\n"
+    },
+    "cancellationDeadline": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Latest moment the booking can be cancelled for a full refund."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the booking was created."
+    },
+    "meetingPoint": {
+      "$ref": "#/$defs/MeetingPoint"
+    },
+    "tourLanguage": {
+      "type": "string",
+      "description": "ISO-639-1 language code."
+    },
+    "specialRequest": {
+      "type": "string",
+      "description": "Free-text note from the guest, forwarded to the host."
+    },
+    "mainGuest": {
+      "type": "object",
+      "required": [
+        "firstName"
+      ],
+      "description": "The main guest (traveller) on the booking. This is the lead traveller\nsupplied as `mainGuest` on create. Absent when no main guest is recorded.\n",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Absent when the main guest has no phone number on their profile."
+        }
+      }
+    },
+    "host": {
+      "type": "object",
+      "required": [
+        "firstName"
+      ],
+      "description": "Minimal host details for day-of identification.",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Absent when the host has no phone number on their profile."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "BookingStatus": {
+      "type": "string",
+      "description": "Partner-facing booking lifecycle. Translated from the internal `TripStatus`\nby a single mapper (`PartnerBookingStatus.fromTripStatus`).\n\nv1 lifecycle (no holds — `POST /bookings` creates a CONFIRMED booking\ndirectly):\n\n| Partner status | From internal `TripStatus` |\n|---|---|\n| `CONFIRMED`  | `CONFIRMED`, `COMPLETED` |\n| `CANCELLED`  | `CANCELLEDBYGUEST` / `HOST` / `ADMIN` / `HOSTNOSHOW` / `COUPON` (with `cancellationReason`) |\n\nInternal statuses that belong to the guest negotiation flow (`PROPOSAL`,\n`PAIDPROPOSAL`, `UNCONFIRMED`, `REJECTED`, `DELETED`) are not\npartner-visible. `RESERVATION` / `TIMEDOUT` / `EXPIRED` cannot occur in\nv1 because there is no reserve step.\n",
+      "enum": [
+        "CONFIRMED",
+        "CANCELLED"
+      ]
+    },
+    "MeetingPoint": {
+      "type": "object",
+      "description": "Where the experience starts.",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Short human-readable name."
+        },
+        "address": {
+          "type": "string",
+          "description": "Formatted address line."
+        },
+        "lat": {
+          "type": "number",
+          "format": "double",
+          "description": "Latitude in decimal degrees (WGS84)."
+        },
+        "lon": {
+          "type": "number",
+          "format": "double",
+          "description": "Longitude in decimal degrees (WGS84)."
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Free-text guidance for finding the meeting spot."
+        }
+      }
+    }
+  }
+}

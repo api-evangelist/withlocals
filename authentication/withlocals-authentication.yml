@@ -1,0 +1,20 @@
+generated: '2026-10-09'
+method: derived
+source: openapi/withlocals-partner-api-openapi.yml
+docs: https://developers.withlocals.com/api-reference/
+probed: "GET https://test-api.withlocals.com/v1/partner/products without a token returned HTTP 401 (2026-10-09)"
+summary:
+  types:
+  - http
+schemes:
+- name: bearerAuth
+  type: http
+  scheme: bearer
+  bearerFormat: opaque
+  description: |-
+    Per-partner opaque API token issued by Withlocals. Send on every
+    request as:
+
+        Authorization: Bearer <token>
+  sources:
+  - openapi/withlocals-partner-api-openapi.yml

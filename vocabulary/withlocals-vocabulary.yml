@@ -1,0 +1,151 @@
+generated: '2026-10-09'
+method: derived
+generator: derive-vocabulary.py
+source: openapi/withlocals-partner-api-openapi.yml
+vocabulary:
+  name: Withlocals Domain Vocabulary
+  description: 'Terms declared by Withlocals''s own API contract: its resource groups, objects and enumerations, with the contract''s definitions.
+    Derived, not authored.'
+  version: '2026-10-09'
+  terms:
+  - term: Supplier
+    definition: Self-describing supplier metadata.
+    tags:
+    - Resource Group
+    source: openapi/withlocals-partner-api-openapi.yml
+  - term: Products
+    definition: Bookable products.
+    tags:
+    - Resource Group
+    source: openapi/withlocals-partner-api-openapi.yml
+  - term: Availability
+    definition: Availability calendar.
+    tags:
+    - Resource Group
+    source: openapi/withlocals-partner-api-openapi.yml
+  - term: Bookings
+    definition: Reserve, confirm, amend, cancel, and read bookings.
+    tags:
+    - Resource Group
+    source: openapi/withlocals-partner-api-openapi.yml
+  - term: Webhooks
+    definition: Out-of-band events delivered by Withlocals to a partner-registered URL. Register at `PUT /webhooks`. See the *Webhooks* section
+      for the delivery contract and the events Withlocals sends.
+    tags:
+    - Resource Group
+    source: openapi/withlocals-partner-api-openapi.yml
+  - term: Error
+    definition: Error envelope.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/Error
+  - term: Restrictions
+    definition: Booking-size limits for a product option.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/Restrictions
+  - term: Money
+    definition: A monetary amount in minor units.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/Money
+  - term: GuestPrice
+    definition: Per-person price for a specific party size.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/GuestPrice
+  - term: ProductOption
+    definition: A bookable variant of a product (e.g. a specific start-time slot).
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/ProductOption
+  - term: Product
+    definition: A bookable experience.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/Product
+  - term: ProductPage
+    definition: One page of `Product` results.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/ProductPage
+  - term: AvailabilityRequest
+    definition: Availability lookup for a single product over a date range.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/AvailabilityRequest
+  - term: CalendarDay
+    definition: One day in the availability calendar.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/CalendarDay
+  - term: AvailabilityCalendar
+    definition: Day-grain availability calendar — one entry per day in the range.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/AvailabilityCalendar
+  - term: BookingStatus
+    definition: 'Partner-facing booking lifecycle. Translated from the internal `TripStatus` by a single mapper (`PartnerBookingStatus.fromTripStatus`).
+      v1 lifecycle (no holds — `POST /bookings` creates a CONFIRMED booking directly): | Partner status | From internal `TripStatus` | |---|---|
+      | `CONFIRMED` | `CONFIRMED`, `COMPLETED` | | `CANCELLED` | `CANCELLEDBYGUEST` / `HOST` / `ADMIN` / `HOSTNOSHOW` / `COUPON` (w'
+    tags:
+    - Enumeration
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/BookingStatus
+  - term: MeetingPoint
+    definition: Where the experience starts.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/MeetingPoint
+  - term: Booking
+    definition: A partner booking. Returned by create, amend, cancel, and read. When `status=CANCELLED`, `cancellationReason` is set and the record
+      persists for partner refund handling.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/Booking
+  - term: Guest
+    definition: A single guest on a booking.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/Guest
+  - term: CreateBookingRequest
+    definition: Body of `POST /bookings` — creates a `CONFIRMED` booking.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/CreateBookingRequest
+  - term: GuestCancellationReason
+    definition: Why the guest is cancelling. Sent on partner-initiated cancellations (`DELETE /bookings/{bookingId}`). | Value | Meaning | |---|---|
+      | `MY_PLANS_CHANGED` | My plans changed | | `FOUND_BETTER_OPTION` | Found better option | | `HOST_ASKED_TO_CANCEL`| Host asked to cancel
+      | | `HOST_NOT_RESPONDING` | Host not responding | | `OTHER` | Other |
+    tags:
+    - Enumeration
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/GuestCancellationReason
+  - term: CancelRequest
+    definition: Optional body of `DELETE /bookings/{bookingId}`.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/CancelRequest
+  - term: AmendRequest
+    definition: Body of `PATCH /bookings/{bookingId}`. Any subset of fields may be supplied.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/AmendRequest
+  - term: Webhook
+    definition: Webhook registration. A single URL receives all event types; partners dispatch by the `eventType` field in each delivered payload.
+      The `secret` is returned **only on first registration** (the `201` response of `PUT /webhooks`). Subsequent reads and updates exclude it
+      — save it on receipt. To rotate, `DELETE /webhooks` then `PUT /webhooks` again.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/Webhook
+  - term: WebhookRegistration
+    definition: Request body for `PUT /webhooks`. Only `url` is accepted — the signing `secret` is generated by Withlocals and returned (once)
+      in the `201` response, never supplied by the partner.
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/WebhookRegistration
+  - term: BookingCancelledEvent
+    definition: 'Payload of the `booking.cancelled` webhook. Thin by design — partner refetches the full booking via `GET /bookings/{bookingId}`
+      if needed. `status` and `cancellationReason` mirror the booking API: `status` is the lifecycle state (always `CANCELLED` for this event)
+      and `cancellationReason` identifies who initiated the cancellation.'
+    tags:
+    - Object
+    source: openapi/withlocals-partner-api-openapi.yml#/components/schemas/BookingCancelledEvent

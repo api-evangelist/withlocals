@@ -1,0 +1,13 @@
+generated: '2026-10-09'
+method: searched
+source: https://developers.withlocals.com/api-reference/openapi.yaml
+docs: https://developers.withlocals.com/api-reference/
+description: >-
+  The only server published in the Partner API contract is https://test-api.withlocals.com/v1/partner,
+  labelled "Test / Sandbox". It requires the same per-partner bearer token (unauthenticated GET
+  /products returned HTTP 401 on 2026-10-09). No production base URL, test-key prefix, test fixtures
+  or self-serve sandbox signup are published; tokens are "issued by Withlocals".
+environments:
+- name: Test / Sandbox
+  base_url: https://test-api.withlocals.com/v1/partner
+  probed_status: 401

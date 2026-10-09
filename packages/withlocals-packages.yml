@@ -1,0 +1,36 @@
+generated: '2026-10-09'
+method: searched
+source: https://registry.npmjs.org/-/v1/search?text=withlocals
+note: >-
+  npm search for "withlocals" returned three packages published by the npm user `withlocals`
+  (developers@withlocals.com). Only withlocals-partner-sdk is an API client. The developer
+  portal (developers.withlocals.com) and the WithlocalsDev GitHub org (one repo, partner-api-doc)
+  name no SDK. PyPI /pypi/withlocals/json returned 404.
+packages:
+- name: withlocals-partner-sdk
+  registry: npm
+  url: https://www.npmjs.com/package/withlocals-partner-sdk
+  language: JavaScript
+  official: true
+  version: 2.0.6
+  published: '2022-03-16'
+  metadata: https://registry.npmjs.org/withlocals-partner-sdk
+  note: >-
+    Published by the npm maintainer `withlocals` <developers@withlocals.com>; description
+    "NodeJS client for withlocals-partner-sdk", license Unlicense, repository field is an unfilled
+    generator placeholder (GIT_USER_ID/GIT_REPO_ID). Last release 2022-03-16 predates the current
+    Partner API contract (OpenAPI 3.1.0, info.version 1.0.0, repo pushed 2026-08-10) and is not
+    referenced by the docs, so it likely targets an earlier partner API.
+other_packages:
+- name: withlocals-cloudinary
+  registry: npm
+  url: https://www.npmjs.com/package/withlocals-cloudinary
+  version: 2.4.1
+  published: '2019-09-06'
+  note: '"A package for resizing cloudinary images for react js." Not an API client.'
+- name: withlocals-cloud-function-typescript-template
+  registry: npm
+  url: https://www.npmjs.com/package/withlocals-cloud-function-typescript-template
+  version: 1.0.0
+  published: '2023-07-19'
+  note: '"This is a TypeScript based Cloud Function template." Not an API client.'

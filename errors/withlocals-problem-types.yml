@@ -1,0 +1,48 @@
+generated: '2026-10-09'
+method: derived
+generator: derive-problem-types.py
+source:
+- openapi/withlocals-partner-api-openapi.yml
+format: custom
+envelope:
+  media_type: application/json
+  schema: Error
+coverage:
+  operations: 12
+  statuses_declared: 5
+problems:
+- status: 400
+  title: Bad Request
+  description: The request is malformed or fails validation.
+  operations: 7
+  media_types:
+  - application/json
+  schema: Error
+- status: 401
+  title: Unauthorized
+  description: Missing or invalid Bearer token.
+  operations: 12
+  media_types:
+  - application/json
+  schema: Error
+- status: 404
+  title: Not Found
+  description: The resource does not exist or is not visible to this partner.
+  operations: 8
+  media_types:
+  - application/json
+  schema: Error
+- status: 409
+  title: Conflict
+  description: 'Conflicting state. Common causes: the hold has expired, the booking has'
+  operations: 1
+  media_types:
+  - application/json
+  schema: Error
+- status: 412
+  title: Precondition Failed
+  description: Precondition for the action is not met (e.g. the booking is past its
+  operations: 1
+  media_types:
+  - application/json
+  schema: Error

@@ -1,0 +1,2 @@
+Contact: security@withlocals.com
+Encryption: https://keybase.io/withlocalssecuri/pgp_keys.asc?fingerprint=7e3b6386f5398a331c938bbe8f8aeb735809b2bc

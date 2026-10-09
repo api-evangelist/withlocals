@@ -1,0 +1,11 @@
+generated: '2026-10-09'
+method: none
+source: https://developers.withlocals.com/api-reference/openapi.yaml
+name: Withlocals Partner API rate limits
+limit_count: 0
+limits: []
+note: >-
+  No request-rate limits, rate-limit headers or 429 responses are published in the API reference or
+  contract. The contract documents only request-shape caps: availability range "may span at most
+  **92 days**" and pagination "page * pageSize must not exceed the configured limit, currently 5,000
+  items" (both return 400).

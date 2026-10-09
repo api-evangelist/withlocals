@@ -1,0 +1,25 @@
+summary: CONFIRMED booking returned by POST /bookings
+value:
+  id: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+  partnerReference: "XYZ-001"
+  productId: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
+  title: "Hidden food gems of Amsterdam"
+  date: "2026-07-15"
+  time: "10:00"
+  timeZone: "Europe/Amsterdam"
+  status: CONFIRMED
+  cancellationDeadline: "2026-07-08T08:00:00Z"
+  createdAt: "2026-05-28T13:42:11Z"
+  meetingPoint:
+    name: "Café Brecht"
+    address: "Weteringschans 157, 1017 SE Amsterdam, Netherlands"
+    lat: 52.3617
+    lon: 4.8907
+  tourLanguage: "en"
+  mainGuest:
+    firstName: "Anna"
+    lastName: "Jansen"
+    phoneNumber: "+31201234567"
+  host:
+    firstName: "Carla"
+    phoneNumber: "+31209876543"

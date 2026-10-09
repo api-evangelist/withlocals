@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/withlocals/main/json-schema/withlocals-webhook-schema.json",
+  "title": "Webhook",
+  "description": "Webhook registration. A single URL receives all event types; partners\ndispatch by the `eventType` field in each delivered payload.\n\nThe `secret` is returned **only on first registration** (the `201` response\nof `PUT /webhooks`). Subsequent reads and updates exclude it — save it on\nreceipt. To rotate, `DELETE /webhooks` then `PUT /webhooks` again.\n",
+  "x-generated": "2026-10-09",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/withlocals-partner-api-openapi.yml#/components/schemas/Webhook",
+  "type": "object",
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "HTTPS URL where webhook events are POSTed."
+    },
+    "secret": {
+      "type": "string",
+      "description": "HMAC-SHA256 signing secret. Used to verify `X-Withlocals-Signature` on\ndelivered events. Returned only on first registration.\n"
+    }
+  }
+}

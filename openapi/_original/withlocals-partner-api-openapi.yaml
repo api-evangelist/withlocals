@@ -1,0 +1,1569 @@
+openapi: 3.1.0
+info:
+  title: Withlocals Partner API
+  version: 1.0.0
+  description: |
+    A single contract for OTA partners and other commercial integrations.
+    Covers products, availability, and the create -> amend -> cancel booking
+    lifecycle.
+
+    `POST /bookings` creates a `CONFIRMED` booking.
+  contact:
+    name: Withlocals Partner Integrations
+    email: partners@withlocals.com
+  x-logo:
+    url: ./assets/logo.svg
+    altText: Withlocals
+    href: https://www.withlocals.com
+    backgroundColor: '#ffffff'
+servers:
+  - url: https://test-api.withlocals.com/v1/partner
+    description: Test / Sandbox
+security:
+  - bearerAuth: []
+tags:
+  - name: Supplier
+    description: Self-describing supplier metadata.
+  - name: Products
+    description: Bookable products.
+  - name: Availability
+    description: Availability calendar.
+  - name: Bookings
+    description: Reserve, confirm, amend, cancel, and read bookings.
+  - name: Webhooks
+    description: |
+      Out-of-band events delivered by Withlocals to a partner-registered URL.
+      Register at `PUT /webhooks`. See the *Webhooks* section for the delivery
+      contract and the events Withlocals sends.
+paths:
+  /:
+    get:
+      tags:
+        - Supplier
+      operationId: getSupplier
+      summary: Get supplier details
+      description: |
+        Returns the supplier's self-description.
+
+        v1 surfaces:
+          - `supplierName` — identifies the supplier.
+          - `supportsIdempotencyKey` — currently `false`
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /products:
+    get:
+      tags:
+        - Products
+      operationId: listProducts
+      summary: List bookable products
+      description: |
+        Paginated list of bookable products.
+
+        Possible errors: `BAD_REQUEST` (invalid pagination), `UNAUTHORIZED`.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPage'
+              examples:
+                golden:
+                  $ref: '#/components/examples/product-page'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /products/{productId}:
+    get:
+      tags:
+        - Products
+      operationId: getProduct
+      summary: Get a single product by id
+      description: |
+        Fetch single product by id.
+
+        Possible errors: `NOT_FOUND`, `UNAUTHORIZED`.
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+              examples:
+                golden:
+                  $ref: '#/components/examples/product'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /availability/calendar:
+    post:
+      tags:
+        - Availability
+      operationId: availabilityCalendar
+      summary: Get availability calendar
+      description: |
+        Day-by-day availability for one product.
+
+        Returns one entry per day, inclusive of both `from` and `to`, in ascending
+        date order. Each entry answers three questions: can anything be booked
+        (`status`), how much is left (`vacancies`), and at which times
+        (`startingTimes`) - enough to render a month grid without a follow-up call
+        per day.
+
+        `startingTimes` contains only times that can actually be booked, so it is
+        safe to drive a time picker directly from it. It is empty on `SOLD_OUT`
+        and `CLOSED` days.
+
+        ### Range limits
+
+        The range may span at most **92 days**, counting both endpoints. Past
+        dates are accepted and come back with no availability.
+
+        Returns `400` if the range exceeds 92 days, or if `from` is after `to`.
+
+        Possible errors: `BAD_REQUEST` (range invalid or too long), `UNAUTHORIZED`,
+        `NOT_FOUND` (product unknown or not bookable).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityRequest'
+            examples:
+              golden:
+                $ref: '#/components/examples/availability-request'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityCalendar'
+              examples:
+                golden:
+                  $ref: '#/components/examples/availability-calendar'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /bookings:
+    get:
+      tags:
+        - Bookings
+      operationId: listBookings
+      summary: List bookings
+      description: |
+        Returns bookings matching the supplied filters. Filters combine with
+        `AND`. All filters are optional; with none supplied, a default date
+        window is applied (roughly the last month through the next year).
+
+        Use `date` for an exact day, or `fromDate` + `toDate` for a range —
+        `date` is mutually exclusive with the range pair (supplying both
+        returns `400`).
+
+        Possible errors: `BAD_REQUEST`, `UNAUTHORIZED`.
+      parameters:
+        - name: partnerReference
+          in: query
+          required: false
+          description: Partner's own booking id.
+          schema:
+            type: string
+          example: XYZ-001
+        - name: date
+          in: query
+          required: false
+          description: |
+            Single booking date (`YYYY-MM-DD`). Mutually exclusive with
+            `fromDate` / `toDate`.
+          schema:
+            type: string
+            format: date
+          example: '2026-07-15'
+        - name: fromDate
+          in: query
+          required: false
+          description: Range start, inclusive. Pair with `toDate`.
+          schema:
+            type: string
+            format: date
+          example: '2026-07-01'
+        - name: toDate
+          in: query
+          required: false
+          description: Range end, inclusive. Pair with `fromDate`.
+          schema:
+            type: string
+            format: date
+          example: '2026-07-31'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Bookings
+      operationId: createBooking
+      summary: Create a confirmed booking
+      description: |
+        Creates a `CONFIRMED` booking. Use `Idempotency-Key` to make retries safe.
+
+        Possible errors: `BAD_REQUEST`, `UNAUTHORIZED`, `NOT_FOUND` (product
+        unknown or not bookable), `CONFLICT` (slot no longer available).
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+            examples:
+              golden:
+                $ref: '#/components/examples/create-booking-request'
+      responses:
+        '201':
+          description: Created (`CONFIRMED`)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+              examples:
+                golden:
+                  $ref: '#/components/examples/booking-confirmed'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /bookings/{bookingId}:
+    get:
+      tags:
+        - Bookings
+      operationId: getBooking
+      summary: Get a single booking by id
+      description: |
+        Reads a single booking by its Withlocals id. Ownership-scoped: a partner
+        can only fetch bookings belonging to its own company. A booking owned by
+        another partner returns `404` (not `403`), so existence is not revealed.
+
+        Possible errors: `NOT_FOUND`, `UNAUTHORIZED`.
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+              examples:
+                confirmed:
+                  $ref: '#/components/examples/booking-confirmed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Bookings
+      operationId: amendBooking
+      summary: Amend a booking (date / time and / or party size)
+      description: |
+        Partial update. May trigger an
+        internal host transfer if the original host is unavailable on the new date.
+
+        Possible errors: `BAD_REQUEST`, `NOT_FOUND`, `PRECONDITION_FAILED` (past cut-off), `UNAUTHORIZED`.
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AmendRequest'
+            examples:
+              golden:
+                $ref: '#/components/examples/amend-request'
+      responses:
+        '200':
+          description: Amended
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+    delete:
+      tags:
+        - Bookings
+      operationId: cancelBooking
+      summary: Cancel a booking
+      description: |
+        Cancels a booking. The booking **persists** with `status=CANCELLED` and a
+        `cancellationReason` of `CANCELLEDBYGUEST` (partner-initiated cancellations
+        are always attributed to the guest); a subsequent `GET` still returns it.
+
+        The cancellation `reason` may be sent in the request body, or as the
+        `reason` query parameter for clients that cannot send `DELETE` bodies. When
+        supplied, it must be one of the `GuestCancellationReason` values, otherwise
+        the request returns `400`.
+
+        Possible errors: `BAD_REQUEST` (invalid `reason`), `NOT_FOUND`, `UNAUTHORIZED`.
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - name: reason
+          in: query
+          required: false
+          description: Fallback for clients that cannot send a `DELETE` body.
+          schema:
+            $ref: '#/components/schemas/GuestCancellationReason'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+              examples:
+                golden:
+                  $ref: '#/components/examples/cancel-response-cancelled'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /webhooks:
+    get:
+      tags:
+        - Webhooks
+      operationId: getWebhook
+      summary: Get current webhook registration
+      description: |
+        Returns the partner's currently registered webhook URL. The signing
+        `secret` is **not** returned — it is only revealed once, on first
+        registration.
+
+        Possible errors: `NOT_FOUND` (no webhook registered), `UNAUTHORIZED`.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Webhooks
+      operationId: setWebhook
+      summary: Register or update the webhook URL
+      description: |
+        Registers a webhook URL on first call (`201`), or updates an existing
+        registration (`200`).
+
+        On first registration, the response includes a `secret` — save it.
+        Withlocals will not return it again. Subsequent reads and updates omit
+        the secret. To rotate, `DELETE /webhooks` and re-register.
+
+        The URL must be HTTPS and reachable from the public internet.
+
+        Possible errors: `BAD_REQUEST` (URL invalid or not HTTPS), `UNAUTHORIZED`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRegistration'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '201':
+          description: Registered (first time — `secret` included in response)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags:
+        - Webhooks
+      operationId: deleteWebhook
+      summary: Remove the webhook registration
+      description: |
+        Unregisters the partner's webhook. No further events will be delivered
+        until a new URL is registered via `PUT /webhooks`.
+
+        Possible errors: `NOT_FOUND` (nothing registered), `UNAUTHORIZED`.
+      responses:
+        '204':
+          description: Removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+webhooks:
+  bookingCancelled:
+    post:
+      tags:
+        - Webhooks
+      operationId: bookingCancelledWebhook
+      summary: Booking cancelled
+      description: |
+        Sent to the partner's registered webhook URL when a booking transitions
+        to `CANCELLED`, regardless of who initiated the cancellation (guest,
+        host, admin, or system no-show).
+
+        **Delivery semantics:**
+
+        - HTTP `POST` with `Content-Type: application/json`.
+        - **At-least-once.** Retries on non-2xx for ~24h with exponential
+          backoff. Partners MUST dedupe on `eventId`.
+        - **Acknowledge fast.** Any 2xx response stops retries. Process the
+          event asynchronously if work is slow — Withlocals retries after 10s.
+
+        **Signature verification:**
+
+        Every delivery includes an `X-Withlocals-Signature` header of the form
+        `t={unix-seconds},v1={hex-hmac}`. Compute
+        `HMAC-SHA256(secret, "{t}.{raw-body}")` and constant-time-compare to
+        `v1`. Reject if the timestamp is older than 5 minutes (replay window).
+      security: []
+      parameters:
+        - name: X-Withlocals-Signature
+          in: header
+          required: true
+          description: |
+            HMAC-SHA256 signature with timestamp.
+            Format: `t={unix-seconds},v1={hex-digest}`.
+          schema:
+            type: string
+          example: t=1750000000,v1=5257a869e7ecebeda32affa62cdca3fa...
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCancelledEvent'
+      responses:
+        2XX:
+          description: Acknowledged — Withlocals stops retrying.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: |
+        Per-partner opaque API token issued by Withlocals. Send on every
+        request as:
+
+            Authorization: Bearer <token>
+  schemas:
+    Supplier:
+      type: object
+      description: |
+        Self-describing supplier metadata. Returned from `GET /`. Partners SHOULD
+        read this on first connect and cache it.
+
+        - Prices are quoted in **EUR** only in v1 (see `Money`); there is no
+          per-request currency selection.
+        - v1 has **no reserve step** — `POST /bookings` creates a `CONFIRMED`
+          booking directly.
+      required:
+        - supplierName
+      properties:
+        supplierName:
+          type: string
+          example: Withlocals
+        supportsIdempotencyKey:
+          type: boolean
+          default: false
+          description: |
+            When `true`, repeated `POST /bookings` with the same `Idempotency-Key`
+            header return the original result. v1 ships with `false` (the header
+            is accepted but not enforced); flips to `true` in future versions.
+    Error:
+      type: object
+      description: |
+        Error envelope.
+      required:
+        - error
+        - errorMessage
+      properties:
+        error:
+          type: string
+          description: Stable error code. Partners are expected to switch on this value.
+          enum:
+            - BAD_REQUEST
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - NOT_FOUND
+            - CONFLICT
+            - PRECONDITION_FAILED
+            - INTERNAL_ERROR
+        errorMessage:
+          type: string
+          description: Human-readable message. Not stable; do not parse.
+          example: Hold expired before confirmation.
+        requestId:
+          type: string
+          description: Trace id for support requests.
+          example: req_5f3a9b71
+    Restrictions:
+      type: object
+      description: Booking-size limits for a product option.
+      required:
+        - minGuests
+        - maxGuests
+      properties:
+        minGuests:
+          type: integer
+          minimum: 1
+          description: Minimum number of guests per booking.
+          example: 1
+        maxGuests:
+          type: integer
+          minimum: 1
+          description: Maximum number of guests per booking.
+          example: 8
+    Money:
+      type: object
+      description: |
+        A monetary amount in minor units.
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: integer
+          description: Integer value in minor units (cents); e.g. `12000` = €120.00.
+          example: 12000
+        currency:
+          type: string
+          enum:
+            - EUR
+          description: ISO-4217 currency code. Always `EUR` in v1.
+          example: EUR
+    GuestPrice:
+      type: object
+      description: Per-person price for a specific party size.
+      required:
+        - guests
+        - retailPrice
+        - netPrice
+      properties:
+        guests:
+          type: integer
+          description: Party size this per-person price applies to.
+          example: 2
+        retailPrice:
+          $ref: '#/components/schemas/Money'
+          description: |
+            Per-person price the guest pays, including the service fee.
+        netPrice:
+          $ref: '#/components/schemas/Money'
+          description: |
+            Per-person price the partner pays Withlocals, including the service fee,
+            with the partner discount applied.
+    ProductOption:
+      type: object
+      description: A bookable variant of a product (e.g. a specific start-time slot).
+      required:
+        - id
+        - default
+        - availabilityLocalStartTimes
+        - restrictions
+      properties:
+        id:
+          type: string
+        default:
+          type: boolean
+          description: Whether this is the product's default option.
+          example: true
+        availabilityLocalStartTimes:
+          type: array
+          items:
+            type: string
+            pattern: ^([01]\d|2[0-3]):[0-5]\d$
+          description: |
+            Local clock-time slots (`HH:mm`, 24-hour) at which this option starts.
+            Times are in the experience's own time zone; no date or offset is implied.
+          example:
+            - '09:00'
+            - '13:30'
+        restrictions:
+          $ref: '#/components/schemas/Restrictions'
+        pricingPerGuest:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuestPrice'
+          description: |
+            Per-person retail and net price per party size
+            (`minGuests`..`maxGuests`). Party sizes with no configured price are
+            omitted. Authoritative price source.
+    Product:
+      type: object
+      description: A bookable experience.
+      required:
+        - id
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Hidden food gems of Amsterdam
+        description:
+          type: string
+        prettyUrl:
+          type: string
+          description: Slug suitable for partner display URLs.
+          example: hidden-food-gems-of-amsterdam
+        area:
+          type: string
+          example: Amsterdam
+        countryCode:
+          type: string
+          pattern: ^[A-Z]{2}$
+          description: ISO-3166-1 alpha-2 country code (uppercase).
+          example: NL
+        instantConfirmation:
+          type: boolean
+          description: |
+            When `true`, bookings on this product are confirmed immediately without
+            host approval. `GET /products` only returns products with
+            `instantConfirmation: true`, so partners will not see un-bookable items.
+            The field is retained for forward compatibility with a future
+            request-to-book flow.
+          example: true
+        durationMinutes:
+          type: integer
+          minimum: 0
+          example: 180
+        languages:
+          type: array
+          items:
+            type: string
+          description: ISO-639-1 codes the experience can be hosted in.
+          example:
+            - en
+            - nl
+        images:
+          type: array
+          items:
+            type: object
+            required:
+              - url
+            properties:
+              url:
+                type: string
+                format: uri
+              alt:
+                type: string
+        options:
+          type: array
+          description: Bookable variants of this product.
+          items:
+            $ref: '#/components/schemas/ProductOption'
+    ProductPage:
+      type: object
+      description: One page of `Product` results.
+      required:
+        - items
+        - page
+        - pageSize
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        page:
+          type: integer
+          minimum: 1
+          example: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          example: 50
+        total:
+          type: integer
+          minimum: 0
+          example: 248
+    AvailabilityRequest:
+      type: object
+      description: Availability lookup for a single product over a date range.
+      required:
+        - productId
+        - dateRange
+      properties:
+        productId:
+          type: string
+          format: uuid
+        dateRange:
+          type: object
+          description: |
+            Both bounds are inclusive, and the range may span at most 92 days
+            counting both endpoints. `from` must not be after `to`. Violating
+            either rule returns `400`.
+          required:
+            - from
+            - to
+          properties:
+            from:
+              type: string
+              format: date
+              description: First day to report on, inclusive.
+              example: '2026-07-15'
+            to:
+              type: string
+              format: date
+              description: Last day to report on, inclusive. At most 91 days after `from`.
+              example: '2026-07-21'
+    CalendarDay:
+      type: object
+      description: One day in the availability calendar.
+      required:
+        - date
+        - status
+        - vacancies
+        - startingTimes
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-07-15'
+        status:
+          type: string
+          enum:
+            - AVAILABLE
+            - SOLD_OUT
+            - CLOSED
+          description: |
+            Whether anything can be booked on this day.
+
+            - `AVAILABLE` — at least one slot is free. `vacancies` is above `0`.
+            - `SOLD_OUT` — the product runs this day, but nothing is free: every
+              host is booked, away, or past their lead-time cutoff. `vacancies` is
+              `0` and `startingTimes` is empty.
+            - `CLOSED` — the product does not run this day at all: it has no start
+              times configured, or the whole day is blocked at product level. Hosts
+              being unavailable gives `SOLD_OUT`, never `CLOSED`.
+        vacancies:
+          type: integer
+          minimum: 0
+          description: |
+            How many slots are free, where one slot is one host at one start time.
+
+            **This is not a seat count.** A slot is exclusive to a single party and
+            holds up to `Product.options[].restrictions.maxGuests`, so one vacancy
+            serves a party of 1 or a party of 8 alike. Never compare `vacancies`
+            against your party size — check `minGuests`/`maxGuests` for that.
+
+            It is also not the length of `startingTimes`: two hosts free at `10:00`
+            give `vacancies: 2` with `startingTimes: ["10:00"]`.
+
+            `0` when `status` is `SOLD_OUT` or `CLOSED`.
+          example: 2
+        startingTimes:
+          type: array
+          items:
+            type: string
+            pattern: ^[0-2][0-9]:[0-5][0-9]$
+          description: |
+            The start times you can actually book on this day. Local time to the
+            product's timezone, `HH:MM` 24-hour, sorted ascending, each time listed
+            once no matter how many hosts offer it.
+
+            Safe to render straight into a time picker - every entry is bookable.
+
+            **This is not the product's configured schedule.** A product offering a
+            start every 30 minutes can return a single entry here once host
+            availability, existing bookings, and lead-time rules are applied. The
+            advertised schedule is `Product.options[].availabilityLocalStartTimes`;
+            this field is always a subset of it.
+
+            Empty when `status` is `SOLD_OUT` or `CLOSED`.
+          example:
+            - '10:00'
+            - '14:00'
+    AvailabilityCalendar:
+      type: object
+      description: Day-grain availability calendar — one entry per day in the range.
+      required:
+        - availability
+      properties:
+        availability:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarDay'
+    BookingStatus:
+      type: string
+      description: |
+        Partner-facing booking lifecycle. Translated from the internal `TripStatus`
+        by a single mapper (`PartnerBookingStatus.fromTripStatus`).
+
+        v1 lifecycle (no holds — `POST /bookings` creates a CONFIRMED booking
+        directly):
+
+        | Partner status | From internal `TripStatus` |
+        |---|---|
+        | `CONFIRMED`  | `CONFIRMED`, `COMPLETED` |
+        | `CANCELLED`  | `CANCELLEDBYGUEST` / `HOST` / `ADMIN` / `HOSTNOSHOW` / `COUPON` (with `cancellationReason`) |
+
+        Internal statuses that belong to the guest negotiation flow (`PROPOSAL`,
+        `PAIDPROPOSAL`, `UNCONFIRMED`, `REJECTED`, `DELETED`) are not
+        partner-visible. `RESERVATION` / `TIMEDOUT` / `EXPIRED` cannot occur in
+        v1 because there is no reserve step.
+      enum:
+        - CONFIRMED
+        - CANCELLED
+    MeetingPoint:
+      type: object
+      description: Where the experience starts.
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Short human-readable name.
+          example: Hyakumanben Chion-ji Temple
+        address:
+          type: string
+          description: Formatted address line.
+          example: Japan, 〒600-8012 Kyoto, Shimogyo Ward, 四条大橋西詰
+        lat:
+          type: number
+          format: double
+          description: Latitude in decimal degrees (WGS84).
+          example: 35.0298797
+        lon:
+          type: number
+          format: double
+          description: Longitude in decimal degrees (WGS84).
+          example: 135.7807599
+        instructions:
+          type: string
+          description: Free-text guidance for finding the meeting spot.
+    Booking:
+      type: object
+      description: |
+        A partner booking. Returned by create, amend, cancel, and read.
+
+        When `status=CANCELLED`, `cancellationReason` is set and the record persists
+        for partner refund handling.
+      required:
+        - id
+        - status
+        - productId
+        - title
+        - date
+        - time
+        - timeZone
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Withlocals booking id.
+        partnerReference:
+          type: string
+          description: Partner's own booking id (internally `external_id`).
+          example: XYZ-001
+        productId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          description: Denormalized product title at the time of booking.
+          example: A Relaxed Morning at Hyakumanben Craft Market
+        date:
+          type: string
+          format: date
+          example: '2027-10-15'
+        time:
+          type: string
+          pattern: ^[0-2][0-9]:[0-5][0-9]$
+          description: Local clock time at the experience location.
+          example: '09:00'
+        timeZone:
+          type: string
+          description: IANA time zone for `date` / `time`.
+          example: Asia/Tokyo
+        status:
+          $ref: '#/components/schemas/BookingStatus'
+        cancellationReason:
+          type: string
+          enum:
+            - CANCELLEDBYGUEST
+            - CANCELLEDBYHOST
+            - CANCELLEDBYADMIN
+            - HOSTNOSHOW
+          description: |
+            Present when `status=CANCELLED`. Partner-initiated cancellations
+            (`DELETE /bookings/{bookingId}`) always set `CANCELLEDBYGUEST`; the
+            other values appear on bookings cancelled internally by the host,
+            admin, or marked as a no-show.
+        cancellationDeadline:
+          type: string
+          format: date-time
+          description: Latest moment the booking can be cancelled for a full refund.
+          example: '2027-10-08T09:00:00Z'
+        createdAt:
+          type: string
+          format: date-time
+          description: When the booking was created.
+          example: '2026-05-24T17:11:17Z'
+        meetingPoint:
+          $ref: '#/components/schemas/MeetingPoint'
+        tourLanguage:
+          type: string
+          description: ISO-639-1 language code.
+          example: en
+        specialRequest:
+          type: string
+          description: Free-text note from the guest, forwarded to the host.
+        mainGuest:
+          type: object
+          required:
+            - firstName
+          description: |
+            The main guest (traveller) on the booking. This is the lead traveller
+            supplied as `mainGuest` on create. Absent when no main guest is recorded.
+          properties:
+            firstName:
+              type: string
+              example: Maria
+            lastName:
+              type: string
+              example: Rossi
+            phoneNumber:
+              type: string
+              description: Absent when the main guest has no phone number on their profile.
+              example: '+31201234567'
+        host:
+          type: object
+          required:
+            - firstName
+          description: Minimal host details for day-of identification.
+          properties:
+            firstName:
+              type: string
+              example: Ren
+            phoneNumber:
+              type: string
+              description: Absent when the host has no phone number on their profile.
+              example: '+31201234567'
+    Guest:
+      type: object
+      description: A single guest on a booking.
+      required:
+        - firstName
+      properties:
+        firstName:
+          type: string
+          example: Anna
+        lastName:
+          type: string
+          example: Kowalska
+        email:
+          type: string
+          format: email
+          example: anna@example.com
+        phone:
+          type: string
+          example: '+31201234567'
+    CreateBookingRequest:
+      type: object
+      description: |
+        Body of `POST /bookings` — creates a `CONFIRMED` booking.
+      required:
+        - productId
+        - date
+        - time
+        - numberOfAdults
+        - mainGuest
+      properties:
+        productId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+          example: '2026-07-15'
+        time:
+          type: string
+          pattern: ^[0-2][0-9]:[0-5][0-9]$
+          example: '10:00'
+        numberOfAdults:
+          type: integer
+          minimum: 1
+          example: 2
+        numberOfChildren:
+          type: integer
+          minimum: 0
+          default: 0
+        mainGuest:
+          $ref: '#/components/schemas/Guest'
+        otherGuests:
+          type: array
+          items:
+            $ref: '#/components/schemas/Guest'
+        partnerReference:
+          type: string
+          description: Partner's own booking id.
+          example: XYZ-001
+        specialRequest:
+          type: string
+          description: Free-text note from the guest, forwarded to the host.
+        tourLanguage:
+          type: string
+          description: ISO-639-1 language code.
+          example: en
+    GuestCancellationReason:
+      type: string
+      description: |
+        Why the guest is cancelling. Sent on partner-initiated cancellations
+        (`DELETE /bookings/{bookingId}`).
+
+        | Value | Meaning |
+        |---|---|
+        | `MY_PLANS_CHANGED`    | My plans changed |
+        | `FOUND_BETTER_OPTION` | Found better option |
+        | `HOST_ASKED_TO_CANCEL`| Host asked to cancel |
+        | `HOST_NOT_RESPONDING` | Host not responding |
+        | `OTHER`               | Other |
+      enum:
+        - MY_PLANS_CHANGED
+        - FOUND_BETTER_OPTION
+        - HOST_ASKED_TO_CANCEL
+        - HOST_NOT_RESPONDING
+        - OTHER
+      example: MY_PLANS_CHANGED
+    CancelRequest:
+      type: object
+      description: Optional body of `DELETE /bookings/{bookingId}`.
+      properties:
+        reason:
+          $ref: '#/components/schemas/GuestCancellationReason'
+    AmendRequest:
+      type: object
+      description: |
+        Body of `PATCH /bookings/{bookingId}`. Any subset of fields may be supplied.
+      properties:
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+          pattern: ^[0-2][0-9]:[0-5][0-9]$
+        numberOfAdults:
+          type: integer
+          minimum: 1
+        numberOfChildren:
+          type: integer
+          minimum: 0
+    Webhook:
+      type: object
+      description: |
+        Webhook registration. A single URL receives all event types; partners
+        dispatch by the `eventType` field in each delivered payload.
+
+        The `secret` is returned **only on first registration** (the `201` response
+        of `PUT /webhooks`). Subsequent reads and updates exclude it — save it on
+        receipt. To rotate, `DELETE /webhooks` then `PUT /webhooks` again.
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: HTTPS URL where webhook events are POSTed.
+          example: https://partner.example.com/withlocals/webhook
+        secret:
+          type: string
+          description: |
+            HMAC-SHA256 signing secret. Used to verify `X-Withlocals-Signature` on
+            delivered events. Returned only on first registration.
+          example: whsec_a1b2c3d4e5f6a7b8c9d0e1f2
+    WebhookRegistration:
+      type: object
+      description: |
+        Request body for `PUT /webhooks`. Only `url` is accepted — the signing
+        `secret` is generated by Withlocals and returned (once) in the `201`
+        response, never supplied by the partner.
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: HTTPS URL where webhook events are POSTed.
+          example: https://partner.example.com/withlocals/webhook
+    BookingCancelledEvent:
+      type: object
+      description: |
+        Payload of the `booking.cancelled` webhook. Thin by design — partner
+        refetches the full booking via `GET /bookings/{bookingId}` if needed.
+
+        `status` and `cancellationReason` mirror the booking API: `status` is the
+        lifecycle state (always `CANCELLED` for this event) and `cancellationReason`
+        identifies who initiated the cancellation.
+      required:
+        - eventId
+        - eventType
+        - occurredAt
+        - bookingId
+        - status
+        - cancellationReason
+      properties:
+        eventId:
+          type: string
+          format: uuid
+          description: |
+            Unique per delivery. Partners SHOULD dedupe on this to tolerate
+            at-least-once delivery.
+          example: 9c3b5d8e-1f4a-4c2b-8d6e-7f0a1b2c3d4e
+        eventType:
+          type: string
+          enum:
+            - booking.cancelled
+          example: booking.cancelled
+        occurredAt:
+          type: string
+          format: date-time
+          description: When the cancellation happened.
+          example: '2026-06-15T09:42:11Z'
+        bookingId:
+          type: string
+          format: uuid
+          description: Withlocals booking id. Refetch via `GET /bookings/{bookingId}` for full state.
+          example: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+        status:
+          type: string
+          enum:
+            - CANCELLED
+          description: Booking lifecycle state. Always `CANCELLED` for this event.
+          example: CANCELLED
+        cancellationReason:
+          type: string
+          enum:
+            - CANCELLEDBYGUEST
+            - CANCELLEDBYHOST
+            - CANCELLEDBYADMIN
+            - HOSTNOSHOW
+          description: |
+            Present when `status=CANCELLED`. Partner-initiated cancellations
+            (`DELETE /bookings/{bookingId}`) always set `CANCELLEDBYGUEST`; the
+            other values appear on bookings cancelled internally by the host,
+            admin, or marked as a no-show.
+  responses:
+    Unauthorized:
+      description: Missing or invalid Bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: UNAUTHORIZED
+            errorMessage: Missing or invalid API token
+            requestId: req_7c2b18d1
+    BadRequest:
+      description: The request is malformed or fails validation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: BAD_REQUEST
+            errorMessage: '`date` is required.'
+            requestId: req_7c2b18d2
+    NotFound:
+      description: The resource does not exist or is not visible to this partner.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: NOT_FOUND
+            errorMessage: No product with that id.
+            requestId: req_7c2b18d3
+    Conflict:
+      description: |
+        Conflicting state. Common causes: the hold has expired, the booking has
+        already been confirmed or cancelled, or a concurrent change occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: CONFLICT
+            errorMessage: Hold expired before confirmation.
+            requestId: req_7c2b18d5
+    PreconditionFailed:
+      description: |
+        Precondition for the action is not met (e.g. the booking is past its
+        amendment cut-off).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: PRECONDITION_FAILED
+            errorMessage: Booking is no longer amendable (cut-off passed).
+            requestId: req_7c2b18d6
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      description: 1-indexed page number.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: |
+        Page size. Subject to a server-side result-window cap: `page * pageSize`
+        must not exceed the configured limit, currently 5,000 items (a request that
+        exceeds it returns `400`).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5000
+        default: 50
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      description: Withlocals product id.
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: |
+        Client-generated key making the request safe to retry. Repeated requests with
+        the same key return the original response.
+      schema:
+        type: string
+        maxLength: 255
+    BookingId:
+      name: bookingId
+      in: path
+      required: true
+      description: Withlocals booking id (returned by `POST /bookings`).
+      schema:
+        type: string
+        format: uuid
+  examples:
+    product-page:
+      summary: First page of products
+      value:
+        items:
+          - id: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+            title: Hidden food gems of Amsterdam
+            description: A 3-hour walking tour through Amsterdam's most loved local food spots, hosted by a local.
+            prettyUrl: hidden-food-gems-of-amsterdam
+            area: Amsterdam
+            countryCode: NL
+            instantConfirmation: true
+            durationMinutes: 180
+            languages:
+              - en
+              - nl
+            images:
+              - url: https://images.withlocals.com/products/1b9d6bcd/hero.jpg
+                alt: Group sampling stroopwafels at an Amsterdam market stall
+              - url: https://images.withlocals.com/products/1b9d6bcd/canal.jpg
+                alt: Host leading guests along a canal in the Jordaan
+              - url: https://images.withlocals.com/products/1b9d6bcd/cheese.jpg
+                alt: Aged Dutch cheeses arranged on a tasting board
+            options:
+              - id: morning
+                default: true
+                availabilityLocalStartTimes:
+                  - '09:00'
+                  - '10:30'
+                restrictions:
+                  minGuests: 1
+                  maxGuests: 8
+                pricingPerGuest:
+                  - guests: 1
+                    retailPrice:
+                      amount: 9000
+                      currency: EUR
+                    netPrice:
+                      amount: 7650
+                      currency: EUR
+                  - guests: 2
+                    retailPrice:
+                      amount: 6000
+                      currency: EUR
+                    netPrice:
+                      amount: 5100
+                      currency: EUR
+              - id: afternoon
+                default: false
+                availabilityLocalStartTimes:
+                  - '13:30'
+                restrictions:
+                  minGuests: 2
+                  maxGuests: 6
+                pricingPerGuest:
+                  - guests: 2
+                    retailPrice:
+                      amount: 6500
+                      currency: EUR
+                    netPrice:
+                      amount: 5525
+                      currency: EUR
+                  - guests: 4
+                    retailPrice:
+                      amount: 5500
+                      currency: EUR
+                    netPrice:
+                      amount: 4675
+                      currency: EUR
+        page: 1
+        pageSize: 50
+        total: 248
+    product:
+      summary: An Amsterdam food tour
+      value:
+        id: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+        title: Hidden food gems of Amsterdam
+        description: A 3-hour walking tour through Amsterdam's most loved local food spots, hosted by a local.
+        prettyUrl: hidden-food-gems-of-amsterdam
+        area: Amsterdam
+        countryCode: NL
+        instantConfirmation: true
+        durationMinutes: 180
+        languages:
+          - en
+          - nl
+        images:
+          - url: https://images.withlocals.com/products/1b9d6bcd/hero.jpg
+            alt: Group sampling stroopwafels at an Amsterdam market stall
+          - url: https://images.withlocals.com/products/1b9d6bcd/canal.jpg
+            alt: Host leading guests along a canal in the Jordaan
+          - url: https://images.withlocals.com/products/1b9d6bcd/cheese.jpg
+            alt: Aged Dutch cheeses arranged on a tasting board
+        options:
+          - id: morning
+            default: true
+            availabilityLocalStartTimes:
+              - '09:00'
+              - '10:30'
+            restrictions:
+              minGuests: 1
+              maxGuests: 8
+            pricingPerGuest:
+              - guests: 1
+                retailPrice:
+                  amount: 9000
+                  currency: EUR
+                netPrice:
+                  amount: 7650
+                  currency: EUR
+              - guests: 2
+                retailPrice:
+                  amount: 6000
+                  currency: EUR
+                netPrice:
+                  amount: 5100
+                  currency: EUR
+          - id: afternoon
+            default: false
+            availabilityLocalStartTimes:
+              - '13:30'
+            restrictions:
+              minGuests: 2
+              maxGuests: 6
+            pricingPerGuest:
+              - guests: 2
+                retailPrice:
+                  amount: 6500
+                  currency: EUR
+                netPrice:
+                  amount: 5525
+                  currency: EUR
+              - guests: 4
+                retailPrice:
+                  amount: 5500
+                  currency: EUR
+                netPrice:
+                  amount: 4675
+                  currency: EUR
+    availability-request:
+      summary: 7-day window
+      value:
+        productId: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+        dateRange:
+          from: '2026-07-15'
+          to: '2026-07-21'
+    availability-calendar:
+      summary: 7-day window, mixed statuses
+      description: |
+        Note `2026-07-15`: three vacancies but only two starting times. Two hosts are
+        free at `10:00`, which is two free slots but one entry in `startingTimes`.
+        And `2026-07-16` shows a day where the product advertises a full schedule yet
+        a single time is bookable - `startingTimes` reports only what can actually be
+        booked, never the configured schedule.
+      value:
+        availability:
+          - date: '2026-07-15'
+            status: AVAILABLE
+            vacancies: 3
+            startingTimes:
+              - '10:00'
+              - '14:00'
+          - date: '2026-07-16'
+            status: AVAILABLE
+            vacancies: 1
+            startingTimes:
+              - '10:00'
+          - date: '2026-07-17'
+            status: SOLD_OUT
+            vacancies: 0
+            startingTimes: []
+          - date: '2026-07-18'
+            status: SOLD_OUT
+            vacancies: 0
+            startingTimes: []
+          - date: '2026-07-19'
+            status: CLOSED
+            vacancies: 0
+            startingTimes: []
+          - date: '2026-07-20'
+            status: AVAILABLE
+            vacancies: 4
+            startingTimes:
+              - '10:00'
+              - '10:30'
+              - '11:00'
+              - '15:00'
+          - date: '2026-07-21'
+            status: AVAILABLE
+            vacancies: 2
+            startingTimes:
+              - '16:00'
+              - '16:30'
+    create-booking-request:
+      summary: Book 2 adults at 10:00 on 15 Jul 2026
+      value:
+        productId: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+        date: '2026-07-15'
+        time: '10:00'
+        numberOfAdults: 2
+        numberOfChildren: 0
+        mainGuest:
+          firstName: Anna
+          lastName: Kowalska
+          email: anna@example.com
+          phone: '+31201234567'
+        partnerReference: XYZ-001
+        tourLanguage: en
+    booking-confirmed:
+      summary: CONFIRMED booking returned by POST /bookings
+      value:
+        id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+        partnerReference: XYZ-001
+        productId: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+        title: Hidden food gems of Amsterdam
+        date: '2026-07-15'
+        time: '10:00'
+        timeZone: Europe/Amsterdam
+        status: CONFIRMED
+        cancellationDeadline: '2026-07-08T08:00:00Z'
+        createdAt: '2026-05-28T13:42:11Z'
+        meetingPoint:
+          name: Café Brecht
+          address: Weteringschans 157, 1017 SE Amsterdam, Netherlands
+          lat: 52.3617
+          lon: 4.8907
+        tourLanguage: en
+        mainGuest:
+          firstName: Anna
+          lastName: Jansen
+          phoneNumber: '+31201234567'
+        host:
+          firstName: Carla
+          phoneNumber: '+31209876543'
+    cancel-response-cancelled:
+      summary: Cancelled booking (persists with reason)
+      value:
+        id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+        partnerReference: XYZ-001
+        productId: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+        title: Hidden food gems of Amsterdam
+        date: '2026-07-15'
+        time: '10:00'
+        timeZone: Europe/Amsterdam
+        status: CANCELLED
+        cancellationReason: CANCELLEDBYGUEST
+        createdAt: '2026-05-28T13:42:11Z'
+    amend-request:
+      summary: Reschedule one day later, same start time
+      value:
+        date: '2026-07-16'
+        time: '10:00'

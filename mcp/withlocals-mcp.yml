@@ -1,0 +1,35 @@
+name: Withlocals MCP Server (candidate)
+type: MCPServer
+generated: '2026-10-09'
+method: derived
+status: candidate
+source: openapi/withlocals-partner-api-openapi.yml
+description: >-
+  Withlocals does not publish an MCP server. A web search on 2026-10-09 found
+  none, and the pre-flight contract discovery reported mcp absent on
+  api/www/developers/go/helpcenter.withlocals.com. https://developers.withlocals.com/.well-known/mcp.json
+  returned 404. www.withlocals.com answers 200 HTML for every path because it
+  is a catch-all, so its /.well-known/mcp.json is not a document. The tools
+  below are a CANDIDATE list derived 1:1 from the Withlocals Partner API
+  OpenAPI operations. Nobody ships them.
+deployment:
+  mode: none
+  auth: unknown
+  verified: derived
+evidence:
+- url: https://developers.withlocals.com/.well-known/mcp.json
+  status: 404
+upstream_auth: Bearer token per partner (Authorization header), per the OpenAPI bearerAuth scheme.
+tools:
+- {name: get_supplier, operationId: getSupplier, description: Get supplier details, readOnly: true}
+- {name: list_products, operationId: listProducts, description: List bookable products (paginated), readOnly: true}
+- {name: get_product, operationId: getProduct, description: Get a single product by id, readOnly: true}
+- {name: get_availability_calendar, operationId: availabilityCalendar, description: Day-by-day availability for one product, readOnly: true}
+- {name: list_bookings, operationId: listBookings, description: List bookings by partnerReference/date filters, readOnly: true}
+- {name: create_booking, operationId: createBooking, description: Create a confirmed booking (supports Idempotency-Key), readOnly: false}
+- {name: get_booking, operationId: getBooking, description: Get a single booking by id, readOnly: true}
+- {name: amend_booking, operationId: amendBooking, description: Amend booking date/time and/or party size, readOnly: false}
+- {name: cancel_booking, operationId: cancelBooking, description: Cancel a booking, readOnly: false, destructive: true}
+- {name: get_webhook, operationId: getWebhook, description: Get current webhook registration, readOnly: true}
+- {name: set_webhook, operationId: setWebhook, description: Register or update the webhook URL, readOnly: false}
+- {name: delete_webhook, operationId: deleteWebhook, description: Remove the webhook registration, readOnly: false, destructive: true}

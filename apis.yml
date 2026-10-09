@@ -1,23 +1,291 @@
 aid: withlocals
+
 name: Withlocals
-description: 'Withlocals is a company surfaced via the API Evangelist harvest backlog (source: spectral-ruleset-github)
-  and added to the network as a stub for full-pipeline profiling.'
+
+description: Withlocals is an experiential travel platform that connects travelers with verified local hosts for private, personalized tours,
+  food experiences and home dinners — over 2,500 experiences in more than 250 destinations (per withlocals.com). It publishes a Withlocals Partner
+  API for distribution partners, documented at developers.withlocals.com, and maintains the WithlocalsDev GitHub organization.
+
 url: https://raw.githubusercontent.com/api-evangelist/withlocals/refs/heads/main/apis.yml
+
 x-type: company
+
 x-source: harvest:spectral-ruleset-github
-x-tier: stub
-x-tier-reason: harvest
+
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-10-09 (modular-v1; was harvest)
+
 specificationVersion: '0.20'
+
 created: '2026-10-09'
+
 modified: '2026-10-09'
+
 tags:
 - Company
-apis: []
+- Travel
+- Tours
+- Experiences
+- Tourism
+- Marketplace
+- Partner API
+
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+
+image: https://withlocals-com-res.cloudinary.com/image/upload/w_800,h_600,c_fill,g_auto,q_auto,f_auto/441436ac4b7884bfc389f46739606bf8
+
 common:
+- type: AgenticAccess
+  url: agentic-access/withlocals-agentic-access.yml
+- type: Spectral
+  url: rules/withlocals-rules.yml
+- type: Spectral
+  url: rules/withlocals-partner-api-doc-spectral-rules.yml
+- type: JSONLD
+  url: json-ld/withlocals-context.jsonld
+- type: Vocabulary
+  url: vocabulary/withlocals-vocabulary.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Webhooks
+  url: asyncapi/withlocals-webhooks.yml
+- type: DataModel
+  url: data-model/withlocals-data-model.yml
+- type: Idempotency
+  url: conventions/withlocals-conventions.yml
+- type: Conventions
+  url: conventions/withlocals-conventions.yml
+- type: Sandbox
+  url: sandbox/withlocals-sandbox.yml
+- type: Security
+  url: security/withlocals-vulnerability-disclosure.yml
+- type: Lifecycle
+  url: lifecycle/withlocals-lifecycle.yml
+- type: ErrorCatalog
+  url: errors/withlocals-error-codes.yml
+- type: ErrorCatalog
+  url: errors/withlocals-problem-types.yml
+- type: Conformance
+  url: conformance/withlocals-conformance.yml
+- type: Overlay
+  url: overlays/withlocals-partner-api-overlay.yaml
+- type: LLMsTxt
+  url: llms/withlocals-llms.txt
+- type: SecurityTxt
+  url: well-known/withlocals-security.txt
+- type: SecurityTxt
+  url: well-known/withlocals-helpcenter-security.txt
+- type: WellKnown
+  url: well-known/withlocals-well-known.yml
+- type: Hosts
+  url: hosts/withlocals-hosts.yml
+- type: Vendors
+  url: vendors/withlocals-vendors.yml
+- type: SDKs
+  url: packages/withlocals-packages.yml
+- type: Packages
+  url: packages/withlocals-packages.yml
+- type: Authentication
+  url: authentication/withlocals-authentication.yml
+- type: VulnerabilityDisclosure
+  url: security/withlocals-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/withlocals-domain-security.yml
 - type: Website
   url: https://www.withlocals.com/
+- type: SpectralRules
+  url: https://github.com/WithlocalsDev/partner-api-doc/blob/d56d26baa8ec926871b573ae62522d2ffa6cbf61/.spectral.yaml
+- type: DeveloperPortal
+  url: https://developers.withlocals.com/
+- type: APIReference
+  url: https://developers.withlocals.com/api-reference/
+- type: HelpCenter
+  url: https://helpcenter.withlocals.com/en/
+- type: GitHubOrganization
+  url: https://github.com/WithlocalsDev
+- type: SignUp
+  url: https://www.withlocals.com/signup/
+- type: Login
+  url: https://www.withlocals.com/login/
+- type: TermsOfService
+  url: https://www.withlocals.com/info/terms-and-conditions/
+- type: PrivacyPolicy
+  url: https://www.withlocals.com/info/privacy-policy/
+
+apis:
+- aid: withlocals:withlocals-availability-api
+  name: Withlocals Availability API
+  description: Availability calendar.
+  humanURL: https://developers.withlocals.com/api-reference/
+  baseURL: https://test-api.withlocals.com/v1/partner
+  tags:
+  - Availability
+  properties:
+  - type: OpenAPI
+    url: openapi/withlocals-availability-api-openapi.yml
+  - type: Documentation
+    url: https://developers.withlocals.com/
+  - type: APIReference
+    url: https://developers.withlocals.com/api-reference/
+  - type: GitHubRepository
+    url: https://github.com/WithlocalsDev/partner-api-doc
+  - type: JSONSchema
+    url: json-schema/withlocals-booking-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-product-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-create-booking-request-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-webhook-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-supplier-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-availability-request-schema.json
+- aid: withlocals:withlocals-bookings-api
+  name: Withlocals Bookings API
+  description: Reserve, confirm, amend, cancel, and read bookings.
+  humanURL: https://developers.withlocals.com/api-reference/
+  baseURL: https://test-api.withlocals.com/v1/partner
+  tags:
+  - Bookings
+  properties:
+  - type: OpenAPI
+    url: openapi/withlocals-bookings-api-openapi.yml
+  - type: Documentation
+    url: https://developers.withlocals.com/
+  - type: APIReference
+    url: https://developers.withlocals.com/api-reference/
+  - type: GitHubRepository
+    url: https://github.com/WithlocalsDev/partner-api-doc
+  - type: JSONSchema
+    url: json-schema/withlocals-booking-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-product-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-create-booking-request-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-webhook-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-supplier-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-availability-request-schema.json
+- aid: withlocals:withlocals-products-api
+  name: Withlocals Products API
+  description: Bookable products.
+  humanURL: https://developers.withlocals.com/api-reference/
+  baseURL: https://test-api.withlocals.com/v1/partner
+  tags:
+  - Products
+  properties:
+  - type: OpenAPI
+    url: openapi/withlocals-products-api-openapi.yml
+  - type: Documentation
+    url: https://developers.withlocals.com/
+  - type: APIReference
+    url: https://developers.withlocals.com/api-reference/
+  - type: GitHubRepository
+    url: https://github.com/WithlocalsDev/partner-api-doc
+  - type: JSONSchema
+    url: json-schema/withlocals-booking-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-product-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-create-booking-request-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-webhook-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-supplier-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-availability-request-schema.json
+- aid: withlocals:withlocals-supplier-api
+  name: Withlocals Supplier API
+  description: Self-describing supplier metadata.
+  humanURL: https://developers.withlocals.com/api-reference/
+  baseURL: https://test-api.withlocals.com/v1/partner
+  tags:
+  - Supplier
+  properties:
+  - type: OpenAPI
+    url: openapi/withlocals-supplier-api-openapi.yml
+  - type: Documentation
+    url: https://developers.withlocals.com/
+  - type: APIReference
+    url: https://developers.withlocals.com/api-reference/
+  - type: GitHubRepository
+    url: https://github.com/WithlocalsDev/partner-api-doc
+  - type: JSONSchema
+    url: json-schema/withlocals-booking-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-product-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-create-booking-request-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-webhook-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-supplier-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-availability-request-schema.json
+- aid: withlocals:withlocals-webhooks-api
+  name: Withlocals Webhooks API
+  description: >-
+    Out-of-band events delivered by Withlocals to a partner-registered URL.
+
+    Register at `PUT /webhooks`. See the *Webhooks* section for the delivery
+
+    contract and the events Withlocals sends.
+  humanURL: https://developers.withlocals.com/api-reference/
+  baseURL: https://test-api.withlocals.com/v1/partner
+  tags:
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/withlocals-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://developers.withlocals.com/
+  - type: APIReference
+    url: https://developers.withlocals.com/api-reference/
+  - type: GitHubRepository
+    url: https://github.com/WithlocalsDev/partner-api-doc
+  - type: JSONSchema
+    url: json-schema/withlocals-booking-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-product-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-create-booking-request-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-webhook-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-supplier-schema.json
+  - type: JSONSchema
+    url: json-schema/withlocals-availability-request-schema.json
+x-enrichment:
+  date: '2026-10-09'
+  status: enriched
+  artifacts_added: 49
+  pass: modular-v1
+  engine: identity=anthropic,contract=anthropic,surfaces=anthropic,docs=anthropic,regulatory=anthropic
+x-coverage:
+  state: covered
+  reason: identity-verified
+  detail: 'Enriched 2026-10-09: website and identity verified (verified) from the provider''s own pages; probed URLs below.'
+  evidence:
+  - url: https://www.withlocals.com/
+    status: 200
+  - url: https://developers.withlocals.com/api-reference/
+    status: 200
+  - url: https://helpcenter.withlocals.com/
+    status: 200
+  - url: https://github.com/WithlocalsDev
+    status: 200
+  - url: https://www.withlocals.com/login/
+    status: 200
+  - url: https://www.withlocals.com/blog/
+    status: 200
+  - url: https://status.withlocals.com/
+    status: 200
+  - url: https://go.withlocals.com/
+    status: 404

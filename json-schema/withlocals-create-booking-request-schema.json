@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/withlocals/main/json-schema/withlocals-create-booking-request-schema.json",
+  "title": "CreateBookingRequest",
+  "description": "Body of `POST /bookings` — creates a `CONFIRMED` booking.\n",
+  "x-generated": "2026-10-09",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/withlocals-partner-api-openapi.yml#/components/schemas/CreateBookingRequest",
+  "type": "object",
+  "required": [
+    "productId",
+    "date",
+    "time",
+    "numberOfAdults",
+    "mainGuest"
+  ],
+  "properties": {
+    "productId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string",
+      "pattern": "^[0-2][0-9]:[0-5][0-9]$"
+    },
+    "numberOfAdults": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "numberOfChildren": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "mainGuest": {
+      "$ref": "#/$defs/Guest"
+    },
+    "otherGuests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Guest"
+      }
+    },
+    "partnerReference": {
+      "type": "string",
+      "description": "Partner's own booking id."
+    },
+    "specialRequest": {
+      "type": "string",
+      "description": "Free-text note from the guest, forwarded to the host."
+    },
+    "tourLanguage": {
+      "type": "string",
+      "description": "ISO-639-1 language code."
+    }
+  },
+  "$defs": {
+    "Guest": {
+      "type": "object",
+      "description": "A single guest on a booking.",
+      "required": [
+        "firstName"
+      ],
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

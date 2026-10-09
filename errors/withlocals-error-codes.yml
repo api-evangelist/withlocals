@@ -1,0 +1,18 @@
+generated: '2026-10-09'
+method: derived
+source: https://developers.withlocals.com/api-reference/openapi.yaml
+docs: https://developers.withlocals.com/api-reference/
+format: custom-json
+envelope:
+  fields: [error, errorMessage, requestId]
+  required: [error, errorMessage]
+  code_field: error
+note: Codes are the enum of components.schemas.Error.error; statuses from the operations' responses that use them.
+problems:
+- {status: 400, title: BAD_REQUEST, type: BAD_REQUEST, description: 'Invalid input, e.g. invalid pagination, availability range over 92 days or from after to, invalid cancellation reason, webhook URL invalid or not HTTPS.', remediation: Fix the request; do not retry unchanged.}
+- {status: 401, title: UNAUTHORIZED, type: UNAUTHORIZED, description: Missing or invalid bearer token., remediation: Send Authorization Bearer with the per-partner token.}
+- {status: 403, title: FORBIDDEN, type: FORBIDDEN, description: Listed in the error-code enum; no operation documents it.}
+- {status: 404, title: NOT_FOUND, type: NOT_FOUND, description: 'Product unknown or not bookable, booking not found, or no webhook registered.'}
+- {status: 409, title: CONFLICT, type: CONFLICT, description: Returned by createBooking.}
+- {status: 412, title: PRECONDITION_FAILED, type: PRECONDITION_FAILED, description: Amendment past cut-off (amendBooking).}
+- {status: 500, title: INTERNAL_ERROR, type: INTERNAL_ERROR, description: Listed in the error-code enum.}

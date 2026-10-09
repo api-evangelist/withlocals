@@ -1,0 +1,64 @@
+generated: '2026-10-09'
+method: derived
+source: https://developers.withlocals.com/api-reference/openapi.yaml
+docs: https://developers.withlocals.com/api-reference/
+name: Withlocals Partner API conventions
+authentication:
+  style: 'HTTP bearer, per-partner opaque API token (Authorization: Bearer <token>)'
+  ref: authentication/withlocals-authentication.yml
+base_url: https://test-api.withlocals.com/v1/partner
+versioning:
+  style: URI path (/v1/partner); info.version 1.0.0
+idempotency:
+  coverage: partial
+  scope:
+  - createBooking
+  header: Idempotency-Key
+  max_length: 255
+  note: >-
+    The Idempotency-Key header is declared only on POST /bookings (createBooking). The spec's
+    Supplier.supportsIdempotencyKey says "v1 ships with `false` (the header is accepted but not
+    enforced); flips to `true` in future versions." In v1 replay protection is therefore declared but
+    NOT enforced. amendBooking, cancelBooking and the webhook writes carry no key.
+pagination:
+  style: page-number
+  params: [page, pageSize]
+  operations: [listProducts]
+  response_fields: [page, pageSize]
+  note: '"page * pageSize must not exceed the configured limit, currently 5,000 items (a request that exceeds it returns 400)."'
+error_envelope:
+  shape: '{ error, errorMessage, requestId }'
+  code_field: error
+  note: '"Stable error code. Partners are expected to switch on this value." errorMessage is "Not stable; do not parse."'
+  ref: errors/withlocals-error-codes.yml
+request_id:
+  field: requestId (in error body)
+  note: '"Trace id for support requests."'
+concurrency:
+  note: amendBooking returns 412 PRECONDITION_FAILED "(past cut-off)".
+rate_limit_signaling:
+  documented: false
+  ref: rate-limits/withlocals-rate-limits.yml
+webhooks:
+  event: booking.cancelled
+  delivery: '"At-least-once. Retries on non-2xx for ~24h with exponential backoff. Partners MUST dedupe on `eventId`."'
+  signature: 'X-Withlocals-Signature: t={unix-seconds},v1={hex-hmac}; HMAC-SHA256(secret, "{t}.{raw-body}"); reject if timestamp older than 5 minutes'
+reversibility:
+  status: documented
+  surfaces:
+  - write: createBooking
+    reversal: cancelBooking
+    operation: DELETE /bookings/{bookingId}
+    window: '"cancellationDeadline: Latest moment the booking can be cancelled for a full refund." (per-booking timestamp returned on the Booking)'
+    grade: verified
+    note: >-
+      The booking persists with status=CANCELLED. The window is returned on each booking, not a
+      fixed period; the spec does not say what happens to the refund after the deadline.
+  - write: amendBooking
+    reversal: amendBooking (amend again) or cancelBooking
+    window: amendments rejected with 412 "past cut-off"; cut-off value not stated
+    grade: documented
+  - write: setWebhook
+    reversal: deleteWebhook
+    window: none stated
+    grade: documented

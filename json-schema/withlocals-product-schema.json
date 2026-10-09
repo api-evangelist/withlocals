@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/withlocals/main/json-schema/withlocals-product-schema.json",
+  "title": "Product",
+  "description": "A bookable experience.",
+  "x-generated": "2026-10-09",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/withlocals-partner-api-openapi.yml#/components/schemas/Product",
+  "type": "object",
+  "required": [
+    "id",
+    "title"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "prettyUrl": {
+      "type": "string",
+      "description": "Slug suitable for partner display URLs."
+    },
+    "area": {
+      "type": "string"
+    },
+    "countryCode": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "ISO-3166-1 alpha-2 country code (uppercase)."
+    },
+    "instantConfirmation": {
+      "type": "boolean",
+      "description": "When `true`, bookings on this product are confirmed immediately without\nhost approval. `GET /products` only returns products with\n`instantConfirmation: true`, so partners will not see un-bookable items.\nThe field is retained for forward compatibility with a future\nrequest-to-book flow.\n"
+    },
+    "durationMinutes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "ISO-639-1 codes the experience can be hosted in."
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "alt": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "options": {
+      "type": "array",
+      "description": "Bookable variants of this product.",
+      "items": {
+        "$ref": "#/$defs/ProductOption"
+      }
+    }
+  },
+  "$defs": {
+    "GuestPrice": {
+      "type": "object",
+      "description": "Per-person price for a specific party size.",
+      "required": [
+        "guests",
+        "retailPrice",
+        "netPrice"
+      ],
+      "properties": {
+        "guests": {
+          "type": "integer",
+          "description": "Party size this per-person price applies to."
+        },
+        "retailPrice": {
+          "$ref": "#/$defs/Money",
+          "description": "Per-person price the guest pays, including the service fee.\n"
+        },
+        "netPrice": {
+          "$ref": "#/$defs/Money",
+          "description": "Per-person price the partner pays Withlocals, including the service fee,\nwith the partner discount applied.\n"
+        }
+      }
+    },
+    "Money": {
+      "type": "object",
+      "description": "A monetary amount in minor units.\n",
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "properties": {
+        "amount": {
+          "type": "integer",
+          "description": "Integer value in minor units (cents); e.g. `12000` = €120.00."
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "EUR"
+          ],
+          "description": "ISO-4217 currency code. Always `EUR` in v1."
+        }
+      }
+    },
+    "ProductOption": {
+      "type": "object",
+      "description": "A bookable variant of a product (e.g. a specific start-time slot).",
+      "required": [
+        "id",
+        "default",
+        "availabilityLocalStartTimes",
+        "restrictions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "default": {
+          "type": "boolean",
+          "description": "Whether this is the product's default option."
+        },
+        "availabilityLocalStartTimes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "description": "Local clock-time slots (`HH:mm`, 24-hour) at which this option starts.\nTimes are in the experience's own time zone; no date or offset is implied.\n"
+        },
+        "restrictions": {
+          "$ref": "#/$defs/Restrictions"
+        },
+        "pricingPerGuest": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GuestPrice"
+          },
+          "description": "Per-person retail and net price per party size\n(`minGuests`..`maxGuests`). Party sizes with no configured price are\nomitted. Authoritative price source.\n"
+        }
+      }
+    },
+    "Restrictions": {
+      "type": "object",
+      "description": "Booking-size limits for a product option.",
+      "required": [
+        "minGuests",
+        "maxGuests"
+      ],
+      "properties": {
+        "minGuests": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Minimum number of guests per booking."
+        },
+        "maxGuests": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum number of guests per booking."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,518 @@
+openapi: 3.2.0
+info:
+  title: Withlocals Partner Products API
+  version: 1.0.0
+  description: 'A single contract for OTA partners and other commercial integrations.
+
+    Covers products, availability, and the create -> amend -> cancel booking
+
+    lifecycle.
+
+
+    `POST /bookings` creates a `CONFIRMED` booking.'
+  contact:
+    name: Withlocals Partner Integrations
+    email: partners@withlocals.com
+  x-logo:
+    url: ./assets/logo.svg
+    altText: Withlocals
+    href: https://www.withlocals.com
+    backgroundColor: '#ffffff'
+servers:
+- url: https://test-api.withlocals.com/v1/partner
+  description: Test / Sandbox
+security:
+- bearerAuth: []
+tags:
+- name: Products
+  description: Bookable products.
+paths:
+  /products:
+    get:
+      tags:
+      - Products
+      operationId: listProducts
+      summary: List bookable products
+      description: 'Paginated list of bookable products.
+
+
+        Possible errors: `BAD_REQUEST` (invalid pagination), `UNAUTHORIZED`.'
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPage'
+              examples:
+                golden:
+                  $ref: '#/components/examples/product-page'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /products/{productId}:
+    get:
+      tags:
+      - Products
+      operationId: getProduct
+      summary: Get a single product by id
+      description: 'Fetch single product by id.
+
+
+        Possible errors: `NOT_FOUND`, `UNAUTHORIZED`.'
+      parameters:
+      - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+              examples:
+                golden:
+                  $ref: '#/components/examples/product'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  responses:
+    Unauthorized:
+      description: Missing or invalid Bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: UNAUTHORIZED
+            errorMessage: Missing or invalid API token
+            requestId: req_7c2b18d1
+    BadRequest:
+      description: The request is malformed or fails validation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: BAD_REQUEST
+            errorMessage: '`date` is required.'
+            requestId: req_7c2b18d2
+    NotFound:
+      description: The resource does not exist or is not visible to this partner.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: NOT_FOUND
+            errorMessage: No product with that id.
+            requestId: req_7c2b18d3
+  examples:
+    product-page:
+      summary: First page of products
+      value:
+        items:
+        - id: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+          title: Hidden food gems of Amsterdam
+          description: A 3-hour walking tour through Amsterdam's most loved local food spots, hosted by a local.
+          prettyUrl: hidden-food-gems-of-amsterdam
+          area: Amsterdam
+          countryCode: NL
+          instantConfirmation: true
+          durationMinutes: 180
+          languages:
+          - en
+          - nl
+          images:
+          - url: https://images.withlocals.com/products/1b9d6bcd/hero.jpg
+            alt: Group sampling stroopwafels at an Amsterdam market stall
+          - url: https://images.withlocals.com/products/1b9d6bcd/canal.jpg
+            alt: Host leading guests along a canal in the Jordaan
+          - url: https://images.withlocals.com/products/1b9d6bcd/cheese.jpg
+            alt: Aged Dutch cheeses arranged on a tasting board
+          options:
+          - id: morning
+            default: true
+            availabilityLocalStartTimes:
+            - 09:00
+            - '10:30'
+            restrictions:
+              minGuests: 1
+              maxGuests: 8
+            pricingPerGuest:
+            - guests: 1
+              retailPrice:
+                amount: 9000
+                currency: EUR
+              netPrice:
+                amount: 7650
+                currency: EUR
+            - guests: 2
+              retailPrice:
+                amount: 6000
+                currency: EUR
+              netPrice:
+                amount: 5100
+                currency: EUR
+          - id: afternoon
+            default: false
+            availabilityLocalStartTimes:
+            - '13:30'
+            restrictions:
+              minGuests: 2
+              maxGuests: 6
+            pricingPerGuest:
+            - guests: 2
+              retailPrice:
+                amount: 6500
+                currency: EUR
+              netPrice:
+                amount: 5525
+                currency: EUR
+            - guests: 4
+              retailPrice:
+                amount: 5500
+                currency: EUR
+              netPrice:
+                amount: 4675
+                currency: EUR
+        page: 1
+        pageSize: 50
+        total: 248
+    product:
+      summary: An Amsterdam food tour
+      value:
+        id: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+        title: Hidden food gems of Amsterdam
+        description: A 3-hour walking tour through Amsterdam's most loved local food spots, hosted by a local.
+        prettyUrl: hidden-food-gems-of-amsterdam
+        area: Amsterdam
+        countryCode: NL
+        instantConfirmation: true
+        durationMinutes: 180
+        languages:
+        - en
+        - nl
+        images:
+        - url: https://images.withlocals.com/products/1b9d6bcd/hero.jpg
+          alt: Group sampling stroopwafels at an Amsterdam market stall
+        - url: https://images.withlocals.com/products/1b9d6bcd/canal.jpg
+          alt: Host leading guests along a canal in the Jordaan
+        - url: https://images.withlocals.com/products/1b9d6bcd/cheese.jpg
+          alt: Aged Dutch cheeses arranged on a tasting board
+        options:
+        - id: morning
+          default: true
+          availabilityLocalStartTimes:
+          - 09:00
+          - '10:30'
+          restrictions:
+            minGuests: 1
+            maxGuests: 8
+          pricingPerGuest:
+          - guests: 1
+            retailPrice:
+              amount: 9000
+              currency: EUR
+            netPrice:
+              amount: 7650
+              currency: EUR
+          - guests: 2
+            retailPrice:
+              amount: 6000
+              currency: EUR
+            netPrice:
+              amount: 5100
+              currency: EUR
+        - id: afternoon
+          default: false
+          availabilityLocalStartTimes:
+          - '13:30'
+          restrictions:
+            minGuests: 2
+            maxGuests: 6
+          pricingPerGuest:
+          - guests: 2
+            retailPrice:
+              amount: 6500
+              currency: EUR
+            netPrice:
+              amount: 5525
+              currency: EUR
+          - guests: 4
+            retailPrice:
+              amount: 5500
+              currency: EUR
+            netPrice:
+              amount: 4675
+              currency: EUR
+  schemas:
+    ProductOption:
+      type: object
+      description: A bookable variant of a product (e.g. a specific start-time slot).
+      required:
+      - id
+      - default
+      - availabilityLocalStartTimes
+      - restrictions
+      properties:
+        id:
+          type: string
+        default:
+          type: boolean
+          description: Whether this is the product's default option.
+          example: true
+        availabilityLocalStartTimes:
+          type: array
+          items:
+            type: string
+            pattern: ^([01]\d|2[0-3]):[0-5]\d$
+          description: 'Local clock-time slots (`HH:mm`, 24-hour) at which this option starts.
+
+            Times are in the experience''s own time zone; no date or offset is implied.
+
+            '
+          example:
+          - 09:00
+          - '13:30'
+        restrictions:
+          $ref: '#/components/schemas/Restrictions'
+        pricingPerGuest:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuestPrice'
+          description: 'Per-person retail and net price per party size
+
+            (`minGuests`..`maxGuests`). Party sizes with no configured price are
+
+            omitted. Authoritative price source.
+
+            '
+    Error:
+      type: object
+      description: 'Error envelope.
+
+        '
+      required:
+      - error
+      - errorMessage
+      properties:
+        error:
+          type: string
+          description: Stable error code. Partners are expected to switch on this value.
+          enum:
+          - BAD_REQUEST
+          - UNAUTHORIZED
+          - FORBIDDEN
+          - NOT_FOUND
+          - CONFLICT
+          - PRECONDITION_FAILED
+          - INTERNAL_ERROR
+        errorMessage:
+          type: string
+          description: Human-readable message. Not stable; do not parse.
+          example: Hold expired before confirmation.
+        requestId:
+          type: string
+          description: Trace id for support requests.
+          example: req_5f3a9b71
+    Money:
+      type: object
+      description: 'A monetary amount in minor units.
+
+        '
+      required:
+      - amount
+      - currency
+      properties:
+        amount:
+          type: integer
+          description: Integer value in minor units (cents); e.g. `12000` = €120.00.
+          example: 12000
+        currency:
+          type: string
+          enum:
+          - EUR
+          description: ISO-4217 currency code. Always `EUR` in v1.
+          example: EUR
+    ProductPage:
+      type: object
+      description: One page of `Product` results.
+      required:
+      - items
+      - page
+      - pageSize
+      - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        page:
+          type: integer
+          minimum: 1
+          example: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          example: 50
+        total:
+          type: integer
+          minimum: 0
+          example: 248
+    Product:
+      type: object
+      description: A bookable experience.
+      required:
+      - id
+      - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Hidden food gems of Amsterdam
+        description:
+          type: string
+        prettyUrl:
+          type: string
+          description: Slug suitable for partner display URLs.
+          example: hidden-food-gems-of-amsterdam
+        area:
+          type: string
+          example: Amsterdam
+        countryCode:
+          type: string
+          pattern: ^[A-Z]{2}$
+          description: ISO-3166-1 alpha-2 country code (uppercase).
+          example: NL
+        instantConfirmation:
+          type: boolean
+          description: 'When `true`, bookings on this product are confirmed immediately without
+
+            host approval. `GET /products` only returns products with
+
+            `instantConfirmation: true`, so partners will not see un-bookable items.
+
+            The field is retained for forward compatibility with a future
+
+            request-to-book flow.
+
+            '
+          example: true
+        durationMinutes:
+          type: integer
+          minimum: 0
+          example: 180
+        languages:
+          type: array
+          items:
+            type: string
+          description: ISO-639-1 codes the experience can be hosted in.
+          example:
+          - en
+          - nl
+        images:
+          type: array
+          items:
+            type: object
+            required:
+            - url
+            properties:
+              url:
+                type: string
+                format: uri
+              alt:
+                type: string
+        options:
+          type: array
+          description: Bookable variants of this product.
+          items:
+            $ref: '#/components/schemas/ProductOption'
+    GuestPrice:
+      type: object
+      description: Per-person price for a specific party size.
+      required:
+      - guests
+      - retailPrice
+      - netPrice
+      properties:
+        guests:
+          type: integer
+          description: Party size this per-person price applies to.
+          example: 2
+        retailPrice:
+          $ref: '#/components/schemas/Money'
+          description: 'Per-person price the guest pays, including the service fee.
+
+            '
+        netPrice:
+          $ref: '#/components/schemas/Money'
+          description: 'Per-person price the partner pays Withlocals, including the service fee,
+
+            with the partner discount applied.
+
+            '
+    Restrictions:
+      type: object
+      description: Booking-size limits for a product option.
+      required:
+      - minGuests
+      - maxGuests
+      properties:
+        minGuests:
+          type: integer
+          minimum: 1
+          description: Minimum number of guests per booking.
+          example: 1
+        maxGuests:
+          type: integer
+          minimum: 1
+          description: Maximum number of guests per booking.
+          example: 8
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      description: 1-indexed page number.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: 'Page size. Subject to a server-side result-window cap: `page * pageSize`
+
+        must not exceed the configured limit, currently 5,000 items (a request that
+
+        exceeds it returns `400`).
+
+        '
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5000
+        default: 50
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      description: Withlocals product id.
+      schema:
+        type: string
+        format: uuid
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: "Per-partner opaque API token issued by Withlocals. Send on every\nrequest as:\n\n    Authorization: Bearer <token>\n"

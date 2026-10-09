@@ -1,0 +1,307 @@
+{
+  "@context": {
+    "@vocab": "https://withlocals.com/schema#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "withlocals": "https://withlocals.com/schema#",
+    "Supplier": "withlocals:Supplier",
+    "supplierName": {
+      "@id": "withlocals:supplierName",
+      "@type": "xsd:string"
+    },
+    "supportsIdempotencyKey": {
+      "@id": "withlocals:supportsIdempotencyKey",
+      "@type": "xsd:boolean"
+    },
+    "Error": "withlocals:Error",
+    "error": {
+      "@id": "withlocals:error",
+      "@type": "xsd:string"
+    },
+    "errorMessage": {
+      "@id": "withlocals:errorMessage",
+      "@type": "xsd:string"
+    },
+    "requestId": {
+      "@id": "withlocals:requestId",
+      "@type": "xsd:string"
+    },
+    "Restrictions": "withlocals:Restrictions",
+    "minGuests": {
+      "@id": "withlocals:minGuests",
+      "@type": "xsd:integer"
+    },
+    "maxGuests": {
+      "@id": "withlocals:maxGuests",
+      "@type": "xsd:integer"
+    },
+    "Money": "withlocals:Money",
+    "amount": {
+      "@id": "withlocals:amount",
+      "@type": "xsd:integer"
+    },
+    "currency": {
+      "@id": "withlocals:currency",
+      "@type": "xsd:string"
+    },
+    "GuestPrice": "withlocals:GuestPrice",
+    "guests": {
+      "@id": "withlocals:guests",
+      "@type": "xsd:integer"
+    },
+    "retailPrice": {
+      "@id": "withlocals:retailPrice",
+      "@type": "@id"
+    },
+    "netPrice": {
+      "@id": "withlocals:netPrice",
+      "@type": "@id"
+    },
+    "ProductOption": "withlocals:ProductOption",
+    "id": {
+      "@id": "withlocals:id",
+      "@type": "xsd:string"
+    },
+    "default": {
+      "@id": "withlocals:default",
+      "@type": "xsd:boolean"
+    },
+    "availabilityLocalStartTimes": {
+      "@id": "withlocals:availabilityLocalStartTimes",
+      "@container": "@list"
+    },
+    "restrictions": {
+      "@id": "withlocals:restrictions",
+      "@type": "@id"
+    },
+    "pricingPerGuest": {
+      "@id": "withlocals:pricingPerGuest",
+      "@container": "@list"
+    },
+    "Product": "withlocals:Product",
+    "title": {
+      "@id": "withlocals:title",
+      "@type": "xsd:string"
+    },
+    "description": {
+      "@id": "withlocals:description",
+      "@type": "xsd:string"
+    },
+    "prettyUrl": {
+      "@id": "withlocals:prettyUrl",
+      "@type": "xsd:string"
+    },
+    "area": {
+      "@id": "withlocals:area",
+      "@type": "xsd:string"
+    },
+    "countryCode": {
+      "@id": "withlocals:countryCode",
+      "@type": "xsd:string"
+    },
+    "instantConfirmation": {
+      "@id": "withlocals:instantConfirmation",
+      "@type": "xsd:boolean"
+    },
+    "durationMinutes": {
+      "@id": "withlocals:durationMinutes",
+      "@type": "xsd:integer"
+    },
+    "languages": {
+      "@id": "withlocals:languages",
+      "@container": "@list"
+    },
+    "images": {
+      "@id": "withlocals:images",
+      "@container": "@list"
+    },
+    "options": {
+      "@id": "withlocals:options",
+      "@container": "@list"
+    },
+    "ProductPage": "withlocals:ProductPage",
+    "items": {
+      "@id": "withlocals:items",
+      "@container": "@list"
+    },
+    "page": {
+      "@id": "withlocals:page",
+      "@type": "xsd:integer"
+    },
+    "pageSize": {
+      "@id": "withlocals:pageSize",
+      "@type": "xsd:integer"
+    },
+    "total": {
+      "@id": "withlocals:total",
+      "@type": "xsd:integer"
+    },
+    "AvailabilityRequest": "withlocals:AvailabilityRequest",
+    "productId": {
+      "@id": "withlocals:productId",
+      "@type": "xsd:string"
+    },
+    "dateRange": {
+      "@id": "withlocals:dateRange"
+    },
+    "CalendarDay": "withlocals:CalendarDay",
+    "date": {
+      "@id": "withlocals:date",
+      "@type": "xsd:date"
+    },
+    "status": {
+      "@id": "withlocals:status",
+      "@type": "xsd:string"
+    },
+    "vacancies": {
+      "@id": "withlocals:vacancies",
+      "@type": "xsd:integer"
+    },
+    "startingTimes": {
+      "@id": "withlocals:startingTimes",
+      "@container": "@list"
+    },
+    "AvailabilityCalendar": "withlocals:AvailabilityCalendar",
+    "availability": {
+      "@id": "withlocals:availability",
+      "@container": "@list"
+    },
+    "BookingStatus": "withlocals:BookingStatus",
+    "MeetingPoint": "withlocals:MeetingPoint",
+    "name": {
+      "@id": "withlocals:name",
+      "@type": "xsd:string"
+    },
+    "address": {
+      "@id": "withlocals:address",
+      "@type": "xsd:string"
+    },
+    "lat": {
+      "@id": "withlocals:lat",
+      "@type": "xsd:decimal"
+    },
+    "lon": {
+      "@id": "withlocals:lon",
+      "@type": "xsd:decimal"
+    },
+    "instructions": {
+      "@id": "withlocals:instructions",
+      "@type": "xsd:string"
+    },
+    "Booking": "withlocals:Booking",
+    "partnerReference": {
+      "@id": "withlocals:partnerReference",
+      "@type": "xsd:string"
+    },
+    "time": {
+      "@id": "withlocals:time",
+      "@type": "xsd:string"
+    },
+    "timeZone": {
+      "@id": "withlocals:timeZone",
+      "@type": "xsd:string"
+    },
+    "cancellationReason": {
+      "@id": "withlocals:cancellationReason",
+      "@type": "xsd:string"
+    },
+    "cancellationDeadline": {
+      "@id": "withlocals:cancellationDeadline",
+      "@type": "xsd:dateTime"
+    },
+    "createdAt": {
+      "@id": "withlocals:createdAt",
+      "@type": "xsd:dateTime"
+    },
+    "meetingPoint": {
+      "@id": "withlocals:meetingPoint",
+      "@type": "@id"
+    },
+    "tourLanguage": {
+      "@id": "withlocals:tourLanguage",
+      "@type": "xsd:string"
+    },
+    "specialRequest": {
+      "@id": "withlocals:specialRequest",
+      "@type": "xsd:string"
+    },
+    "mainGuest": {
+      "@id": "withlocals:mainGuest"
+    },
+    "host": {
+      "@id": "withlocals:host"
+    },
+    "Guest": "withlocals:Guest",
+    "firstName": {
+      "@id": "withlocals:firstName",
+      "@type": "xsd:string"
+    },
+    "lastName": {
+      "@id": "withlocals:lastName",
+      "@type": "xsd:string"
+    },
+    "email": {
+      "@id": "withlocals:email",
+      "@type": "xsd:string"
+    },
+    "phone": {
+      "@id": "withlocals:phone",
+      "@type": "xsd:string"
+    },
+    "CreateBookingRequest": "withlocals:CreateBookingRequest",
+    "numberOfAdults": {
+      "@id": "withlocals:numberOfAdults",
+      "@type": "xsd:integer"
+    },
+    "numberOfChildren": {
+      "@id": "withlocals:numberOfChildren",
+      "@type": "xsd:integer"
+    },
+    "otherGuests": {
+      "@id": "withlocals:otherGuests",
+      "@container": "@list"
+    },
+    "GuestCancellationReason": "withlocals:GuestCancellationReason",
+    "CancelRequest": "withlocals:CancelRequest",
+    "reason": {
+      "@id": "withlocals:reason",
+      "@type": "@id"
+    },
+    "AmendRequest": "withlocals:AmendRequest",
+    "Webhook": "withlocals:Webhook",
+    "url": {
+      "@id": "withlocals:url",
+      "@type": "@id"
+    },
+    "secret": {
+      "@id": "withlocals:secret",
+      "@type": "xsd:string"
+    },
+    "WebhookRegistration": "withlocals:WebhookRegistration",
+    "BookingCancelledEvent": "withlocals:BookingCancelledEvent",
+    "eventId": {
+      "@id": "withlocals:eventId",
+      "@type": "xsd:string"
+    },
+    "eventType": {
+      "@id": "withlocals:eventType",
+      "@type": "xsd:string"
+    },
+    "occurredAt": {
+      "@id": "withlocals:occurredAt",
+      "@type": "xsd:dateTime"
+    },
+    "bookingId": {
+      "@id": "withlocals:bookingId",
+      "@type": "xsd:string"
+    }
+  },
+  "@type": "schema:Dataset",
+  "schema:name": "Withlocals API JSON-LD context",
+  "schema:description": "A JSON-LD @context for the objects Withlocals's own API contract declares: one class per component schema, one property per declared field, typed from the contract. Derived by script (derive-json-ld.py, 2026-10-09) from openapi/withlocals-partner-api-openapi.yml.",
+  "dcterms:created": "2026-10-09",
+  "dcterms:source": [
+    "openapi/withlocals-partner-api-openapi.yml"
+  ]
+}

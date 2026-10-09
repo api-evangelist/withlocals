@@ -1,0 +1,15 @@
+# harvested from https://github.com/WithlocalsDev/partner-api-doc/blob/d56d26baa8ec926871b573ae62522d2ffa6cbf61/.spectral.yaml on 2026-10-09 — a Spectral ruleset published in the provider's own GitHub repository (WithlocalsDev/partner-api-doc); found by GitHub code search, fetched verbatim
+x-method: harvested
+x-stamped: 2026-10-09
+x-source-url: https://github.com/WithlocalsDev/partner-api-doc/blob/d56d26baa8ec926871b573ae62522d2ffa6cbf61/.spectral.yaml
+# Spectral ruleset — house style guide as code.
+# See https://docs.stoplight.io/docs/spectral
+extends:
+  - [spectral:oas, recommended]
+
+rules:
+  operation-operationId: error
+  operation-description: error
+  operation-tag-defined: error
+  operation-success-response: error
+  oas3-schema: error

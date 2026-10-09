@@ -1,0 +1,15 @@
+generated: '2026-10-09'
+method: derived
+generator: derive-webhooks.py
+source:
+- openapi/withlocals-partner-api-openapi.yml
+description: 'Event surface derived from the provider''s own OpenAPI: webhooks. No AsyncAPI document is published by the provider; this catalog
+  lists the events the contract names.'
+management_operations:
+- getWebhook
+- setWebhook
+- deleteWebhook
+events:
+- event: bookingCancelled
+  description: Booking cancelled
+  declared_in: webhooks

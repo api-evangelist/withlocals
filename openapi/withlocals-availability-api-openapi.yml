@@ -1,0 +1,341 @@
+openapi: 3.2.0
+info:
+  title: Withlocals Partner Availability API
+  version: 1.0.0
+  description: 'A single contract for OTA partners and other commercial integrations.
+
+    Covers products, availability, and the create -> amend -> cancel booking
+
+    lifecycle.
+
+
+    `POST /bookings` creates a `CONFIRMED` booking.'
+  contact:
+    name: Withlocals Partner Integrations
+    email: partners@withlocals.com
+  x-logo:
+    url: ./assets/logo.svg
+    altText: Withlocals
+    href: https://www.withlocals.com
+    backgroundColor: '#ffffff'
+servers:
+- url: https://test-api.withlocals.com/v1/partner
+  description: Test / Sandbox
+security:
+- bearerAuth: []
+tags:
+- name: Availability
+  description: Availability calendar.
+paths:
+  /availability/calendar:
+    post:
+      tags:
+      - Availability
+      operationId: availabilityCalendar
+      summary: Get availability calendar
+      description: 'Day-by-day availability for one product.
+
+
+        Returns one entry per day, inclusive of both `from` and `to`, in ascending
+
+        date order. Each entry answers three questions: can anything be booked
+
+        (`status`), how much is left (`vacancies`), and at which times
+
+        (`startingTimes`) - enough to render a month grid without a follow-up call
+
+        per day.
+
+
+        `startingTimes` contains only times that can actually be booked, so it is
+
+        safe to drive a time picker directly from it. It is empty on `SOLD_OUT`
+
+        and `CLOSED` days.
+
+
+        ### Range limits
+
+
+        The range may span at most **92 days**, counting both endpoints. Past
+
+        dates are accepted and come back with no availability.
+
+
+        Returns `400` if the range exceeds 92 days, or if `from` is after `to`.
+
+
+        Possible errors: `BAD_REQUEST` (range invalid or too long), `UNAUTHORIZED`,
+
+        `NOT_FOUND` (product unknown or not bookable).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityRequest'
+            examples:
+              golden:
+                $ref: '#/components/examples/availability-request'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityCalendar'
+              examples:
+                golden:
+                  $ref: '#/components/examples/availability-calendar'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  responses:
+    Unauthorized:
+      description: Missing or invalid Bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: UNAUTHORIZED
+            errorMessage: Missing or invalid API token
+            requestId: req_7c2b18d1
+    BadRequest:
+      description: The request is malformed or fails validation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: BAD_REQUEST
+            errorMessage: '`date` is required.'
+            requestId: req_7c2b18d2
+    NotFound:
+      description: The resource does not exist or is not visible to this partner.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: NOT_FOUND
+            errorMessage: No product with that id.
+            requestId: req_7c2b18d3
+  schemas:
+    Error:
+      type: object
+      description: 'Error envelope.
+
+        '
+      required:
+      - error
+      - errorMessage
+      properties:
+        error:
+          type: string
+          description: Stable error code. Partners are expected to switch on this value.
+          enum:
+          - BAD_REQUEST
+          - UNAUTHORIZED
+          - FORBIDDEN
+          - NOT_FOUND
+          - CONFLICT
+          - PRECONDITION_FAILED
+          - INTERNAL_ERROR
+        errorMessage:
+          type: string
+          description: Human-readable message. Not stable; do not parse.
+          example: Hold expired before confirmation.
+        requestId:
+          type: string
+          description: Trace id for support requests.
+          example: req_5f3a9b71
+    AvailabilityCalendar:
+      type: object
+      description: Day-grain availability calendar — one entry per day in the range.
+      required:
+      - availability
+      properties:
+        availability:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarDay'
+    AvailabilityRequest:
+      type: object
+      description: Availability lookup for a single product over a date range.
+      required:
+      - productId
+      - dateRange
+      properties:
+        productId:
+          type: string
+          format: uuid
+        dateRange:
+          type: object
+          description: 'Both bounds are inclusive, and the range may span at most 92 days
+
+            counting both endpoints. `from` must not be after `to`. Violating
+
+            either rule returns `400`.
+
+            '
+          required:
+          - from
+          - to
+          properties:
+            from:
+              type: string
+              format: date
+              description: First day to report on, inclusive.
+              example: '2026-07-15'
+            to:
+              type: string
+              format: date
+              description: Last day to report on, inclusive. At most 91 days after `from`.
+              example: '2026-07-21'
+    CalendarDay:
+      type: object
+      description: One day in the availability calendar.
+      required:
+      - date
+      - status
+      - vacancies
+      - startingTimes
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-07-15'
+        status:
+          type: string
+          enum:
+          - AVAILABLE
+          - SOLD_OUT
+          - CLOSED
+          description: "Whether anything can be booked on this day.\n\n- `AVAILABLE` — at least one slot is free. `vacancies` is above `0`.\n- `SOLD_OUT` — the product runs this day, but nothing is free: every\n  host is booked, away, or past their lead-time cutoff. `vacancies` is\n  `0` and `startingTimes` is empty.\n- `CLOSED` — the product does not run this day at all: it has no start\n  times configured, or the whole day is blocked at product level. Hosts\n  being unavailable gives `SOLD_OUT`, never `CLOSED`.\n"
+        vacancies:
+          type: integer
+          minimum: 0
+          description: 'How many slots are free, where one slot is one host at one start time.
+
+
+            **This is not a seat count.** A slot is exclusive to a single party and
+
+            holds up to `Product.options[].restrictions.maxGuests`, so one vacancy
+
+            serves a party of 1 or a party of 8 alike. Never compare `vacancies`
+
+            against your party size — check `minGuests`/`maxGuests` for that.
+
+
+            It is also not the length of `startingTimes`: two hosts free at `10:00`
+
+            give `vacancies: 2` with `startingTimes: ["10:00"]`.
+
+
+            `0` when `status` is `SOLD_OUT` or `CLOSED`.
+
+            '
+          example: 2
+        startingTimes:
+          type: array
+          items:
+            type: string
+            pattern: ^[0-2][0-9]:[0-5][0-9]$
+          description: 'The start times you can actually book on this day. Local time to the
+
+            product''s timezone, `HH:MM` 24-hour, sorted ascending, each time listed
+
+            once no matter how many hosts offer it.
+
+
+            Safe to render straight into a time picker - every entry is bookable.
+
+
+            **This is not the product''s configured schedule.** A product offering a
+
+            start every 30 minutes can return a single entry here once host
+
+            availability, existing bookings, and lead-time rules are applied. The
+
+            advertised schedule is `Product.options[].availabilityLocalStartTimes`;
+
+            this field is always a subset of it.
+
+
+            Empty when `status` is `SOLD_OUT` or `CLOSED`.
+
+            '
+          example:
+          - '10:00'
+          - '14:00'
+  examples:
+    availability-calendar:
+      summary: 7-day window, mixed statuses
+      description: 'Note `2026-07-15`: three vacancies but only two starting times. Two hosts are
+
+        free at `10:00`, which is two free slots but one entry in `startingTimes`.
+
+        And `2026-07-16` shows a day where the product advertises a full schedule yet
+
+        a single time is bookable - `startingTimes` reports only what can actually be
+
+        booked, never the configured schedule.
+
+        '
+      value:
+        availability:
+        - date: '2026-07-15'
+          status: AVAILABLE
+          vacancies: 3
+          startingTimes:
+          - '10:00'
+          - '14:00'
+        - date: '2026-07-16'
+          status: AVAILABLE
+          vacancies: 1
+          startingTimes:
+          - '10:00'
+        - date: '2026-07-17'
+          status: SOLD_OUT
+          vacancies: 0
+          startingTimes: []
+        - date: '2026-07-18'
+          status: SOLD_OUT
+          vacancies: 0
+          startingTimes: []
+        - date: '2026-07-19'
+          status: CLOSED
+          vacancies: 0
+          startingTimes: []
+        - date: '2026-07-20'
+          status: AVAILABLE
+          vacancies: 4
+          startingTimes:
+          - '10:00'
+          - '10:30'
+          - '11:00'
+          - '15:00'
+        - date: '2026-07-21'
+          status: AVAILABLE
+          vacancies: 2
+          startingTimes:
+          - '16:00'
+          - '16:30'
+    availability-request:
+      summary: 7-day window
+      value:
+        productId: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+        dateRange:
+          from: '2026-07-15'
+          to: '2026-07-21'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: "Per-partner opaque API token issued by Withlocals. Send on every\nrequest as:\n\n    Authorization: Bearer <token>\n"

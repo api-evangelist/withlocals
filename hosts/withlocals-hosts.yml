@@ -1,0 +1,136 @@
+generated: '2026-10-09'
+method: derived
+source: the pre-flight dossier, apis.yml pointers, spec servers, well-known, vendors -- nothing fetched here
+generator: derive-hosts.py
+summary:
+  hosts: 9
+  own: 8
+  other_domain: 0
+  platform: 1
+  roles:
+  - api
+  - other
+  - partner
+  - portal
+  - source
+  - status
+  - website
+hosts:
+- host: api.withlocals.com
+  found_by:
+  - contract-discovery
+  types: []
+  serves: []
+  registrable_domain: withlocals.com
+  role: api
+  relation: own
+- host: developers.withlocals.com
+  found_by:
+  - pointer
+  - apis[]
+  - probed
+  - site-links
+  - docs-index
+  - spec-found
+  - contract-discovery
+  - well-known
+  - vendor-detect
+  types:
+  - DeveloperPortal
+  - APIReference
+  serves:
+  - docs
+  - spec
+  - cdn
+  - hosting
+  vendor: fastly
+  registrable_domain: withlocals.com
+  role: portal
+  relation: own
+- host: github.com
+  found_by:
+  - pointer
+  types:
+  - SpectralRules
+  - GitHubOrganization
+  serves: []
+  registrable_domain: github.com
+  role: source
+  relation: platform
+- host: go.withlocals.com
+  found_by:
+  - probed
+  - site-links
+  - contract-discovery
+  - well-known
+  types: []
+  serves: []
+  registrable_domain: withlocals.com
+  role: other
+  relation: own
+- host: helpcenter.withlocals.com
+  found_by:
+  - pointer
+  - probed
+  - site-links
+  - contract-discovery
+  - well-known
+  types:
+  - HelpCenter
+  serves: []
+  registrable_domain: withlocals.com
+  role: other
+  relation: own
+- host: partner.withlocals.com
+  found_by:
+  - probed
+  - site-links
+  - namespace-probe
+  - well-known
+  types: []
+  serves: []
+  title: Continue - TradeTracker.com
+  status: 200
+  registrable_domain: withlocals.com
+  role: partner
+  relation: own
+- host: status.withlocals.com
+  found_by:
+  - probed
+  - site-links
+  - well-known
+  types: []
+  serves: []
+  registrable_domain: withlocals.com
+  role: status
+  relation: own
+- host: test-api.withlocals.com
+  found_by:
+  - apis[]
+  types: []
+  serves:
+  - api
+  registrable_domain: withlocals.com
+  role: other
+  relation: own
+- host: www.withlocals.com
+  found_by:
+  - pointer
+  - probed
+  - docs-index
+  - contract-discovery
+  - well-known
+  - vendor-detect
+  types:
+  - Website
+  - SignUp
+  - Login
+  - TermsOfService
+  - PrivacyPolicy
+  serves:
+  - docs
+  - cdn
+  vendor: cloudflare
+  registrable_domain: withlocals.com
+  role: website
+  relation: own

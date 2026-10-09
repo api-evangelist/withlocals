@@ -1,0 +1,82 @@
+generated: '2026-10-09'
+method: searched
+source: https://www.withlocals.com/info/privacy-policy/
+signals:
+  data_subject_request:
+    url: https://www.withlocals.com/info/privacy-policy/
+    section: '6. Your rights and how to exercise them'
+    rights_named: [access, copy, rectification, removal, restriction, portability, objection, withdrawal of consent]
+    escalation: Autoriteit Persoonsgegevens (Dutch Data Protection Authority)
+    evidence:
+    - source: https://www.withlocals.com/info/privacy-policy/
+      http_status: 200
+      fetched: '2026-10-09'
+      quote: >-
+        You can request access to or a copy of your personal data collected and processed by us. You may also
+        request the rectification and removal of personal data or the restriction of the processing of your
+        personal data, if there is a reason for doing so. You also have the right to data portability.
+    - source: https://www.withlocals.com/info/privacy-policy/
+      http_status: 200
+      fetched: '2026-10-09'
+      quote: >-
+        When you delete your account you will be logged out immediately on all devices and your account will be disabled.
+    - source: https://www.withlocals.com/info/privacy-policy/
+      http_status: 200
+      fetched: '2026-10-09'
+      quote: >-
+        If you feel that your rights have been violated, you may also lodge a complaint with the Autoriteit
+        Persoonsgegevens, the Dutch Data Protection Authority (www.autoriteitpersoonsgegevens.nl).
+    note: >-
+      GDPR data-subject rights are named and exercised by emailing the Privacy team (the address is
+      email-obfuscated on the page and not recorded here); self-service account and data deletion is described
+      for web and mobile app. No response SLA is stated.
+  subprocessors:
+    url: https://www.withlocals.com/info/privacy-policy/
+    evidence:
+    - source: https://www.withlocals.com/info/privacy-policy/
+      http_status: 200
+      fetched: '2026-10-09'
+      quote: >-
+        We may employ third party companies and individuals to help improve or facilitate our service, to provide
+        the service on our behalf, to perform Platform-related services, including but not limited to: maintenance
+        services, fraud detection services, database management, web analytics, monitoring and evaluation services.
+    note: >-
+      Categories of processors are disclosed, but no named subprocessor list is published on the page.
+  data_residency:
+    url: https://www.withlocals.com/info/privacy-policy/
+    section: '5. International transfer'
+    evidence:
+    - source: https://www.withlocals.com/info/privacy-policy/
+      http_status: 200
+      fetched: '2026-10-09'
+      quote: >-
+        Your personal information may be disclosed to third parties located outside the European Economic Area
+        (“EEA”), mainly in the US. For such transfers, Withlocals relies on the EU-U.S. Privacy Shield to provide
+        an adequate level of protection for the rights and freedoms of data subjects or Withlocals will take other
+        measures considered adequate to guarantee a safe transfer of your personal data.
+    note: >-
+      Data may leave the EEA (mainly to the US); no residency commitment. The transfer basis cited is the EU-U.S.
+      Privacy Shield, which the CJEU invalidated in 2020 (Schrems II) — the policy still names it despite a
+      September 4, 2026 "last updated" date.
+  incident_notification:
+    url: https://www.withlocals.com/info/privacy-policy/
+    evidence:
+    - source: https://www.withlocals.com/info/privacy-policy/
+      http_status: 200
+      fetched: '2026-10-09'
+      quote: >-
+        In the event of any breach of security Withlocals will make any legally required disclosures concerning
+        the breach and the confidentiality, or integrity of your unencrypted electronically stored "personal data"
+        to you via email or via a posting on the Site and Application without unreasonable delay in as far as it
+        is consistent with any legitimate needs of law enforcement and any measures required to determine the
+        scope of the breach and to safeguard the integrity of data.
+    note: Breach notice to users by email or site posting, limited to legally required disclosures; no fixed timeframe.
+  data_retention:
+    url: https://www.withlocals.com/info/privacy-policy/
+    section: 'Retention periods'
+    evidence:
+    - source: https://www.withlocals.com/info/privacy-policy/
+      http_status: 200
+      fetched: '2026-10-09'
+      quote: We do not keep your personal data longer than necessary for the purpose of the processing.
+    note: Purpose-limitation statement only; no concrete retention periods are published.

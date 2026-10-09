@@ -1,0 +1,46 @@
+overlay: 1.0.0
+info:
+  title: Withlocals Partner API — API Evangelist enhancements
+  version: 1.0.0
+x-generated: '2026-10-09'
+x-method: generated
+extends: ../openapi/_original/withlocals-partner-api-openapi.yaml
+actions:
+- target: $.info
+  update:
+    x-api-evangelist:
+      provider: withlocals
+      repo: https://github.com/api-evangelist/withlocals
+      provider_hosted_spec: https://developers.withlocals.com/api-reference/openapi.yaml
+- target: $.paths['/bookings'].post
+  update:
+    x-idempotency:
+      header: Idempotency-Key
+      maxLength: 255
+      note: Declared on createBooking only. getSupplier documents supportsIdempotencyKey as currently false, so do not rely on it.
+    x-agent-hints:
+      retry_safe_with_idempotency_key: true
+      conflict_status: 409
+- target: $.paths['/bookings/{bookingId}'].delete
+  update:
+    x-agent-hints:
+      destructive: true
+      confirm_before_calling: true
+      note: The booking persists with status=CANCELLED. It is not deleted.
+- target: $.paths['/bookings/{bookingId}'].patch
+  update:
+    x-agent-hints:
+      precondition_failed_status: 412
+- target: $.paths['/webhooks'].put
+  update:
+    x-agent-hints:
+      note: The signing secret is returned only once, on the first registration (201). Store it.
+- target: $.paths['/webhooks'].delete
+  update:
+    x-agent-hints:
+      destructive: true
+      confirm_before_calling: true
+- target: $.paths[*].get
+  update:
+    x-agent-hints:
+      readOnly: true

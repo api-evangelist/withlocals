@@ -1,0 +1,45 @@
+summary: First page of products
+value:
+  items:
+    - id: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
+      title: "Hidden food gems of Amsterdam"
+      description: "A 3-hour walking tour through Amsterdam's most loved local food spots, hosted by a local."
+      prettyUrl: "hidden-food-gems-of-amsterdam"
+      area: "Amsterdam"
+      countryCode: "NL"
+      instantConfirmation: true
+      durationMinutes: 180
+      languages: ["en", "nl"]
+      images:
+        - url: "https://images.withlocals.com/products/1b9d6bcd/hero.jpg"
+          alt: "Group sampling stroopwafels at an Amsterdam market stall"
+        - url: "https://images.withlocals.com/products/1b9d6bcd/canal.jpg"
+          alt: "Host leading guests along a canal in the Jordaan"
+        - url: "https://images.withlocals.com/products/1b9d6bcd/cheese.jpg"
+          alt: "Aged Dutch cheeses arranged on a tasting board"
+      options:
+        - id: "morning"
+          default: true
+          availabilityLocalStartTimes: ["09:00", "10:30"]
+          restrictions: { minGuests: 1, maxGuests: 8 }
+          pricingPerGuest:
+            - guests: 1
+              retailPrice: { amount: 9000, currency: "EUR" }
+              netPrice: { amount: 7650, currency: "EUR" }
+            - guests: 2
+              retailPrice: { amount: 6000, currency: "EUR" }
+              netPrice: { amount: 5100, currency: "EUR" }
+        - id: "afternoon"
+          default: false
+          availabilityLocalStartTimes: ["13:30"]
+          restrictions: { minGuests: 2, maxGuests: 6 }
+          pricingPerGuest:
+            - guests: 2
+              retailPrice: { amount: 6500, currency: "EUR" }
+              netPrice: { amount: 5525, currency: "EUR" }
+            - guests: 4
+              retailPrice: { amount: 5500, currency: "EUR" }
+              netPrice: { amount: 4675, currency: "EUR" }
+  page: 1
+  pageSize: 50
+  total: 248

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/withlocals/main/json-schema/withlocals-availability-request-schema.json",
+  "title": "AvailabilityRequest",
+  "description": "Availability lookup for a single product over a date range.",
+  "x-generated": "2026-10-09",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/withlocals-partner-api-openapi.yml#/components/schemas/AvailabilityRequest",
+  "type": "object",
+  "required": [
+    "productId",
+    "dateRange"
+  ],
+  "properties": {
+    "productId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "dateRange": {
+      "type": "object",
+      "description": "Both bounds are inclusive, and the range may span at most 92 days\ncounting both endpoints. `from` must not be after `to`. Violating\neither rule returns `400`.\n",
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "description": "First day to report on, inclusive."
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "description": "Last day to report on, inclusive. At most 91 days after `from`."
+        }
+      }
+    }
+  }
+}
