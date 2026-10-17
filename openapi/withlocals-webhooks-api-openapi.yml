@@ -179,38 +179,37 @@ webhooks:
         2XX:
           description: Acknowledged — Withlocals stops retrying.
 components:
-  responses:
-    Unauthorized:
-      description: Missing or invalid Bearer token.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: UNAUTHORIZED
-            errorMessage: Missing or invalid API token
-            requestId: req_7c2b18d1
-    BadRequest:
-      description: The request is malformed or fails validation.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: BAD_REQUEST
-            errorMessage: '`date` is required.'
-            requestId: req_7c2b18d2
-    NotFound:
-      description: The resource does not exist or is not visible to this partner.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: NOT_FOUND
-            errorMessage: No product with that id.
-            requestId: req_7c2b18d3
   schemas:
+    Webhook:
+      type: object
+      description: 'Webhook registration. A single URL receives all event types; partners
+
+        dispatch by the `eventType` field in each delivered payload.
+
+
+        The `secret` is returned **only on first registration** (the `201` response
+
+        of `PUT /webhooks`). Subsequent reads and updates exclude it — save it on
+
+        receipt. To rotate, `DELETE /webhooks` then `PUT /webhooks` again.
+
+        '
+      required:
+      - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: HTTPS URL where webhook events are POSTed.
+          example: https://partner.example.com/withlocals/webhook
+        secret:
+          type: string
+          description: 'HMAC-SHA256 signing secret. Used to verify `X-Withlocals-Signature` on
+
+            delivered events. Returned only on first registration.
+
+            '
+          example: whsec_a1b2c3d4e5f6a7b8c9d0e1f2
     Error:
       type: object
       description: 'Error envelope.
@@ -324,36 +323,37 @@ components:
             admin, or marked as a no-show.
 
             '
-    Webhook:
-      type: object
-      description: 'Webhook registration. A single URL receives all event types; partners
-
-        dispatch by the `eventType` field in each delivered payload.
-
-
-        The `secret` is returned **only on first registration** (the `201` response
-
-        of `PUT /webhooks`). Subsequent reads and updates exclude it — save it on
-
-        receipt. To rotate, `DELETE /webhooks` then `PUT /webhooks` again.
-
-        '
-      required:
-      - url
-      properties:
-        url:
-          type: string
-          format: uri
-          description: HTTPS URL where webhook events are POSTed.
-          example: https://partner.example.com/withlocals/webhook
-        secret:
-          type: string
-          description: 'HMAC-SHA256 signing secret. Used to verify `X-Withlocals-Signature` on
-
-            delivered events. Returned only on first registration.
-
-            '
-          example: whsec_a1b2c3d4e5f6a7b8c9d0e1f2
+  responses:
+    Unauthorized:
+      description: Missing or invalid Bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: UNAUTHORIZED
+            errorMessage: Missing or invalid API token
+            requestId: req_7c2b18d1
+    BadRequest:
+      description: The request is malformed or fails validation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: BAD_REQUEST
+            errorMessage: '`date` is required.'
+            requestId: req_7c2b18d2
+    NotFound:
+      description: The resource does not exist or is not visible to this partner.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: NOT_FOUND
+            errorMessage: No product with that id.
+            requestId: req_7c2b18d3
   securitySchemes:
     bearerAuth:
       type: http

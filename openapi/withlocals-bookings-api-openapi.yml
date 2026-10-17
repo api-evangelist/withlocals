@@ -257,7 +257,114 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
+  responses:
+    NotFound:
+      description: The resource does not exist or is not visible to this partner.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: NOT_FOUND
+            errorMessage: No product with that id.
+            requestId: req_7c2b18d3
+    PreconditionFailed:
+      description: 'Precondition for the action is not met (e.g. the booking is past its
+
+        amendment cut-off).
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: PRECONDITION_FAILED
+            errorMessage: Booking is no longer amendable (cut-off passed).
+            requestId: req_7c2b18d6
+    Unauthorized:
+      description: Missing or invalid Bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: UNAUTHORIZED
+            errorMessage: Missing or invalid API token
+            requestId: req_7c2b18d1
+    Conflict:
+      description: 'Conflicting state. Common causes: the hold has expired, the booking has
+
+        already been confirmed or cancelled, or a concurrent change occurred.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: CONFLICT
+            errorMessage: Hold expired before confirmation.
+            requestId: req_7c2b18d5
+    BadRequest:
+      description: The request is malformed or fails validation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: BAD_REQUEST
+            errorMessage: '`date` is required.'
+            requestId: req_7c2b18d2
+  parameters:
+    BookingId:
+      name: bookingId
+      in: path
+      required: true
+      description: Withlocals booking id (returned by `POST /bookings`).
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: 'Client-generated key making the request safe to retry. Repeated requests with
+
+        the same key return the original response.
+
+        '
+      schema:
+        type: string
+        maxLength: 255
   schemas:
+    MeetingPoint:
+      type: object
+      description: Where the experience starts.
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          description: Short human-readable name.
+          example: Hyakumanben Chion-ji Temple
+        address:
+          type: string
+          description: Formatted address line.
+          example: Japan, 〒600-8012 Kyoto, Shimogyo Ward, 四条大橋西詰
+        lat:
+          type: number
+          format: double
+          description: Latitude in decimal degrees (WGS84).
+          example: 35.0298797
+        lon:
+          type: number
+          format: double
+          description: Longitude in decimal degrees (WGS84).
+          example: 135.7807599
+        instructions:
+          type: string
+          description: Free-text guidance for finding the meeting spot.
     GuestCancellationReason:
       type: string
       description: 'Why the guest is cancelling. Sent on partner-initiated cancellations
@@ -287,185 +394,12 @@ components:
       - HOST_NOT_RESPONDING
       - OTHER
       example: MY_PLANS_CHANGED
-    BookingStatus:
-      type: string
-      description: 'Partner-facing booking lifecycle. Translated from the internal `TripStatus`
-
-        by a single mapper (`PartnerBookingStatus.fromTripStatus`).
-
-
-        v1 lifecycle (no holds — `POST /bookings` creates a CONFIRMED booking
-
-        directly):
-
-
-        | Partner status | From internal `TripStatus` |
-
-        |---|---|
-
-        | `CONFIRMED`  | `CONFIRMED`, `COMPLETED` |
-
-        | `CANCELLED`  | `CANCELLEDBYGUEST` / `HOST` / `ADMIN` / `HOSTNOSHOW` / `COUPON` (with `cancellationReason`) |
-
-
-        Internal statuses that belong to the guest negotiation flow (`PROPOSAL`,
-
-        `PAIDPROPOSAL`, `UNCONFIRMED`, `REJECTED`, `DELETED`) are not
-
-        partner-visible. `RESERVATION` / `TIMEDOUT` / `EXPIRED` cannot occur in
-
-        v1 because there is no reserve step.
-
-        '
-      enum:
-      - CONFIRMED
-      - CANCELLED
-    CreateBookingRequest:
-      type: object
-      description: 'Body of `POST /bookings` — creates a `CONFIRMED` booking.
-
-        '
-      required:
-      - productId
-      - date
-      - time
-      - numberOfAdults
-      - mainGuest
-      properties:
-        productId:
-          type: string
-          format: uuid
-        date:
-          type: string
-          format: date
-          example: '2026-07-15'
-        time:
-          type: string
-          pattern: ^[0-2][0-9]:[0-5][0-9]$
-          example: '10:00'
-        numberOfAdults:
-          type: integer
-          minimum: 1
-          example: 2
-        numberOfChildren:
-          type: integer
-          minimum: 0
-          default: 0
-        mainGuest:
-          $ref: '#/components/schemas/Guest'
-        otherGuests:
-          type: array
-          items:
-            $ref: '#/components/schemas/Guest'
-        partnerReference:
-          type: string
-          description: Partner's own booking id.
-          example: XYZ-001
-        specialRequest:
-          type: string
-          description: Free-text note from the guest, forwarded to the host.
-        tourLanguage:
-          type: string
-          description: ISO-639-1 language code.
-          example: en
-    Guest:
-      type: object
-      description: A single guest on a booking.
-      required:
-      - firstName
-      properties:
-        firstName:
-          type: string
-          example: Anna
-        lastName:
-          type: string
-          example: Kowalska
-        email:
-          type: string
-          format: email
-          example: anna@example.com
-        phone:
-          type: string
-          example: '+31201234567'
-    AmendRequest:
-      type: object
-      description: 'Body of `PATCH /bookings/{bookingId}`. Any subset of fields may be supplied.
-
-        '
-      properties:
-        date:
-          type: string
-          format: date
-        time:
-          type: string
-          pattern: ^[0-2][0-9]:[0-5][0-9]$
-        numberOfAdults:
-          type: integer
-          minimum: 1
-        numberOfChildren:
-          type: integer
-          minimum: 0
-    Error:
-      type: object
-      description: 'Error envelope.
-
-        '
-      required:
-      - error
-      - errorMessage
-      properties:
-        error:
-          type: string
-          description: Stable error code. Partners are expected to switch on this value.
-          enum:
-          - BAD_REQUEST
-          - UNAUTHORIZED
-          - FORBIDDEN
-          - NOT_FOUND
-          - CONFLICT
-          - PRECONDITION_FAILED
-          - INTERNAL_ERROR
-        errorMessage:
-          type: string
-          description: Human-readable message. Not stable; do not parse.
-          example: Hold expired before confirmation.
-        requestId:
-          type: string
-          description: Trace id for support requests.
-          example: req_5f3a9b71
     CancelRequest:
       type: object
       description: Optional body of `DELETE /bookings/{bookingId}`.
       properties:
         reason:
           $ref: '#/components/schemas/GuestCancellationReason'
-    MeetingPoint:
-      type: object
-      description: Where the experience starts.
-      required:
-      - name
-      properties:
-        name:
-          type: string
-          description: Short human-readable name.
-          example: Hyakumanben Chion-ji Temple
-        address:
-          type: string
-          description: Formatted address line.
-          example: Japan, 〒600-8012 Kyoto, Shimogyo Ward, 四条大橋西詰
-        lat:
-          type: number
-          format: double
-          description: Latitude in decimal degrees (WGS84).
-          example: 35.0298797
-        lon:
-          type: number
-          format: double
-          description: Longitude in decimal degrees (WGS84).
-          example: 135.7807599
-        instructions:
-          type: string
-          description: Free-text guidance for finding the meeting spot.
     Booking:
       type: object
       description: 'A partner booking. Returned by create, amend, cancel, and read.
@@ -584,7 +518,186 @@ components:
               type: string
               description: Absent when the host has no phone number on their profile.
               example: '+31201234567'
+    Guest:
+      type: object
+      description: A single guest on a booking.
+      required:
+      - firstName
+      properties:
+        firstName:
+          type: string
+          example: Anna
+        lastName:
+          type: string
+          example: Kowalska
+        email:
+          type: string
+          format: email
+          example: anna@example.com
+        phone:
+          type: string
+          example: '+31201234567'
+    Error:
+      type: object
+      description: 'Error envelope.
+
+        '
+      required:
+      - error
+      - errorMessage
+      properties:
+        error:
+          type: string
+          description: Stable error code. Partners are expected to switch on this value.
+          enum:
+          - BAD_REQUEST
+          - UNAUTHORIZED
+          - FORBIDDEN
+          - NOT_FOUND
+          - CONFLICT
+          - PRECONDITION_FAILED
+          - INTERNAL_ERROR
+        errorMessage:
+          type: string
+          description: Human-readable message. Not stable; do not parse.
+          example: Hold expired before confirmation.
+        requestId:
+          type: string
+          description: Trace id for support requests.
+          example: req_5f3a9b71
+    CreateBookingRequest:
+      type: object
+      description: 'Body of `POST /bookings` — creates a `CONFIRMED` booking.
+
+        '
+      required:
+      - productId
+      - date
+      - time
+      - numberOfAdults
+      - mainGuest
+      properties:
+        productId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+          example: '2026-07-15'
+        time:
+          type: string
+          pattern: ^[0-2][0-9]:[0-5][0-9]$
+          example: '10:00'
+        numberOfAdults:
+          type: integer
+          minimum: 1
+          example: 2
+        numberOfChildren:
+          type: integer
+          minimum: 0
+          default: 0
+        mainGuest:
+          $ref: '#/components/schemas/Guest'
+        otherGuests:
+          type: array
+          items:
+            $ref: '#/components/schemas/Guest'
+        partnerReference:
+          type: string
+          description: Partner's own booking id.
+          example: XYZ-001
+        specialRequest:
+          type: string
+          description: Free-text note from the guest, forwarded to the host.
+        tourLanguage:
+          type: string
+          description: ISO-639-1 language code.
+          example: en
+    AmendRequest:
+      type: object
+      description: 'Body of `PATCH /bookings/{bookingId}`. Any subset of fields may be supplied.
+
+        '
+      properties:
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+          pattern: ^[0-2][0-9]:[0-5][0-9]$
+        numberOfAdults:
+          type: integer
+          minimum: 1
+        numberOfChildren:
+          type: integer
+          minimum: 0
+    BookingStatus:
+      type: string
+      description: 'Partner-facing booking lifecycle. Translated from the internal `TripStatus`
+
+        by a single mapper (`PartnerBookingStatus.fromTripStatus`).
+
+
+        v1 lifecycle (no holds — `POST /bookings` creates a CONFIRMED booking
+
+        directly):
+
+
+        | Partner status | From internal `TripStatus` |
+
+        |---|---|
+
+        | `CONFIRMED`  | `CONFIRMED`, `COMPLETED` |
+
+        | `CANCELLED`  | `CANCELLEDBYGUEST` / `HOST` / `ADMIN` / `HOSTNOSHOW` / `COUPON` (with `cancellationReason`) |
+
+
+        Internal statuses that belong to the guest negotiation flow (`PROPOSAL`,
+
+        `PAIDPROPOSAL`, `UNCONFIRMED`, `REJECTED`, `DELETED`) are not
+
+        partner-visible. `RESERVATION` / `TIMEDOUT` / `EXPIRED` cannot occur in
+
+        v1 because there is no reserve step.
+
+        '
+      enum:
+      - CONFIRMED
+      - CANCELLED
   examples:
+    cancel-response-cancelled:
+      summary: Cancelled booking (persists with reason)
+      value:
+        id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+        partnerReference: XYZ-001
+        productId: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+        title: Hidden food gems of Amsterdam
+        date: '2026-07-15'
+        time: '10:00'
+        timeZone: Europe/Amsterdam
+        status: CANCELLED
+        cancellationReason: CANCELLEDBYGUEST
+        createdAt: '2026-05-28T13:42:11Z'
+    create-booking-request:
+      summary: Book 2 adults at 10:00 on 15 Jul 2026
+      value:
+        productId: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+        date: '2026-07-15'
+        time: '10:00'
+        numberOfAdults: 2
+        numberOfChildren: 0
+        mainGuest:
+          firstName: Anna
+          lastName: Kowalska
+          email: anna@example.com
+          phone: '+31201234567'
+        partnerReference: XYZ-001
+        tourLanguage: en
+    amend-request:
+      summary: Reschedule one day later, same start time
+      value:
+        date: '2026-07-16'
+        time: '10:00'
     booking-confirmed:
       summary: CONFIRMED booking returned by POST /bookings
       value:
@@ -611,119 +724,6 @@ components:
         host:
           firstName: Carla
           phoneNumber: '+31209876543'
-    amend-request:
-      summary: Reschedule one day later, same start time
-      value:
-        date: '2026-07-16'
-        time: '10:00'
-    create-booking-request:
-      summary: Book 2 adults at 10:00 on 15 Jul 2026
-      value:
-        productId: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
-        date: '2026-07-15'
-        time: '10:00'
-        numberOfAdults: 2
-        numberOfChildren: 0
-        mainGuest:
-          firstName: Anna
-          lastName: Kowalska
-          email: anna@example.com
-          phone: '+31201234567'
-        partnerReference: XYZ-001
-        tourLanguage: en
-    cancel-response-cancelled:
-      summary: Cancelled booking (persists with reason)
-      value:
-        id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
-        partnerReference: XYZ-001
-        productId: 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
-        title: Hidden food gems of Amsterdam
-        date: '2026-07-15'
-        time: '10:00'
-        timeZone: Europe/Amsterdam
-        status: CANCELLED
-        cancellationReason: CANCELLEDBYGUEST
-        createdAt: '2026-05-28T13:42:11Z'
-  parameters:
-    BookingId:
-      name: bookingId
-      in: path
-      required: true
-      description: Withlocals booking id (returned by `POST /bookings`).
-      schema:
-        type: string
-        format: uuid
-    IdempotencyKey:
-      name: Idempotency-Key
-      in: header
-      required: false
-      description: 'Client-generated key making the request safe to retry. Repeated requests with
-
-        the same key return the original response.
-
-        '
-      schema:
-        type: string
-        maxLength: 255
-  responses:
-    Conflict:
-      description: 'Conflicting state. Common causes: the hold has expired, the booking has
-
-        already been confirmed or cancelled, or a concurrent change occurred.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: CONFLICT
-            errorMessage: Hold expired before confirmation.
-            requestId: req_7c2b18d5
-    Unauthorized:
-      description: Missing or invalid Bearer token.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: UNAUTHORIZED
-            errorMessage: Missing or invalid API token
-            requestId: req_7c2b18d1
-    BadRequest:
-      description: The request is malformed or fails validation.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: BAD_REQUEST
-            errorMessage: '`date` is required.'
-            requestId: req_7c2b18d2
-    NotFound:
-      description: The resource does not exist or is not visible to this partner.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: NOT_FOUND
-            errorMessage: No product with that id.
-            requestId: req_7c2b18d3
-    PreconditionFailed:
-      description: 'Precondition for the action is not met (e.g. the booking is past its
-
-        amendment cut-off).
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: PRECONDITION_FAILED
-            errorMessage: Booking is no longer amendable (cut-off passed).
-            requestId: req_7c2b18d6
   securitySchemes:
     bearerAuth:
       type: http

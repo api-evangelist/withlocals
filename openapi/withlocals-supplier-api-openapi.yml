@@ -63,25 +63,6 @@ components:
             errorMessage: Missing or invalid API token
             requestId: req_7c2b18d1
   schemas:
-    Supplier:
-      type: object
-      description: "Self-describing supplier metadata. Returned from `GET /`. Partners SHOULD\nread this on first connect and cache it.\n\n- Prices are quoted in **EUR** only in v1 (see `Money`); there is no\n  per-request currency selection.\n- v1 has **no reserve step** — `POST /bookings` creates a `CONFIRMED`\n  booking directly.\n"
-      required:
-      - supplierName
-      properties:
-        supplierName:
-          type: string
-          example: Withlocals
-        supportsIdempotencyKey:
-          type: boolean
-          default: false
-          description: 'When `true`, repeated `POST /bookings` with the same `Idempotency-Key`
-
-            header return the original result. v1 ships with `false` (the header
-
-            is accepted but not enforced); flips to `true` in future versions.
-
-            '
     Error:
       type: object
       description: 'Error envelope.
@@ -110,6 +91,25 @@ components:
           type: string
           description: Trace id for support requests.
           example: req_5f3a9b71
+    Supplier:
+      type: object
+      description: "Self-describing supplier metadata. Returned from `GET /`. Partners SHOULD\nread this on first connect and cache it.\n\n- Prices are quoted in **EUR** only in v1 (see `Money`); there is no\n  per-request currency selection.\n- v1 has **no reserve step** — `POST /bookings` creates a `CONFIRMED`\n  booking directly.\n"
+      required:
+      - supplierName
+      properties:
+        supplierName:
+          type: string
+          example: Withlocals
+        supportsIdempotencyKey:
+          type: boolean
+          default: false
+          description: 'When `true`, repeated `POST /bookings` with the same `Idempotency-Key`
+
+            header return the original result. v1 ships with `false` (the header
+
+            is accepted but not enforced); flips to `true` in future versions.
+
+            '
   securitySchemes:
     bearerAuth:
       type: http
