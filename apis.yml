@@ -25,6 +25,14 @@ tags:
 - Company
 - Travel
 - Tours
+- Experience
+- Tourism
+- Marketplace
+- Partner API
+tags_raw:
+- Company
+- Travel
+- Tours
 - Experiences
 - Tourism
 - Marketplace
@@ -151,6 +159,8 @@ apis:
   humanURL: https://developers.withlocals.com/api-reference/
   baseURL: https://test-api.withlocals.com/v1/partner
   tags:
+  - Booking
+  tags_raw:
   - Bookings
   properties:
   - type: OpenAPI
@@ -179,6 +189,8 @@ apis:
   humanURL: https://developers.withlocals.com/api-reference/
   baseURL: https://test-api.withlocals.com/v1/partner
   tags:
+  - Product
+  tags_raw:
   - Products
   properties:
   - type: OpenAPI
@@ -240,6 +252,8 @@ apis:
   humanURL: https://developers.withlocals.com/api-reference/
   baseURL: https://test-api.withlocals.com/v1/partner
   tags:
+  - Webhook
+  tags_raw:
   - Webhooks
   properties:
   - type: OpenAPI
