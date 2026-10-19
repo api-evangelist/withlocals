@@ -1,0 +1,12 @@
+{
+ "url": "https://developers.withlocals.com/api-reference/openapi.yaml",
+ "requested_url": "https://developers.withlocals.com/api-reference/openapi.yaml",
+ "status": 200,
+ "content_type": "text/yaml",
+ "bytes": 51428,
+ "sha256": "8ee75d53ff761d3fd5e44a51c09a8a1a34d1c512feeb4060cefdf48ce8354054",
+ "fetched_at": "2026-10-19",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "byte-identical",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the archived file is byte-identical to what the provider serves."
+}
